@@ -265,8 +265,6 @@ int main(int argc, char *argv[])
 				//opencv	
 				//将帧转换为OpenCV格式
 				frame = cv::Mat(height,width,CV_8UC3,data);			
-				//cv::Mat frame640;
-				//cv::resize(frame, frame640, cv::Size(640,640), 0, 0, cv::INTER_LINEAR);	
 				//letterbox
 				cv::Mat letterboxImage = letterbox(frame);	
 				memcpy(rknn_app_ctx.input_mems[0]->virt_addr, letterboxImage.data, model_width*model_height*3);		
