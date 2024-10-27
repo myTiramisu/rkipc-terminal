@@ -1,17 +1,13 @@
 cmake_minimum_required(VERSION 3.10)
 
-set(SDK_PATH $ENV{LUCKFOX_SDK_PATH})
-if(NOT SDK_PATH)
-    message(WARNING "Please Set Luckfox-pico SDK Path. Such as:export LUCKFOX_SDK_PATH=/home/user/luckfox-pico")
-    return()
-endif()
+#  设置SDK路径
+set(SDK_PATH "/home/yuanjl/luckfox-pico")
 
-set(CMAKE_C_COMPILER "${SDK_PATH}/tools/linux/toolchain/arm-rockchip830-linux-uclibcgnueabihf/bin/arm-rockchip830-linux-uclibcgnueabihf-gcc"
-)
-set(CMAKE_CXX_COMPILER "${SDK_PATH}/tools/linux/toolchain/arm-rockchip830-linux-uclibcgnueabihf/bin/arm-rockchip830-linux-uclibcgnueabihf-g++"
-)
+# 设置编译器
+set(CMAKE_C_COMPILER "${SDK_PATH}/tools/linux/toolchain/arm-rockchip830-linux-uclibcgnueabihf/bin/arm-rockchip830-linux-uclibcgnueabihf-gcc")
+set(CMAKE_CXX_COMPILER "${SDK_PATH}/tools/linux/toolchain/arm-rockchip830-linux-uclibcgnueabihf/bin/arm-rockchip830-linux-uclibcgnueabihf-g++")
 
-#Processing Parameters
+#Processing Parameters 处理参数
 if(DEFINED EXAMPLE_DIR)
     message(STATUS "Selected source directory: ${EXAMPLE_DIR}")
 else()
@@ -26,22 +22,25 @@ else()
     return()
 endif()
 
-
+# 创建项目
 project(${EXAMPLE_NAME})
 
+# 链接目录
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/ 3rdparty.out)
 
+# 设置RPATH
 set(CMAKE_INSTALL_RPATH "$ORIGIN/lib")
 add_definitions(-DRV1106_1103)
 
-#Opencv 4
+#Opencv 4 查找OpenCV
 set(OpenCV_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/cmake/opencv4")
 find_package(OpenCV REQUIRED)
 #Thread
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
+# 源文件
 set(SRC_DIR "${EXAMPLE_DIR}/src")
 file(GLOB SRC_FILES "${SRC_DIR}/*.cc")
 add_executable(${PROJECT_NAME} ${SRC_FILES})
