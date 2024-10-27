@@ -39,7 +39,7 @@ typedef struct {
     int top;
     int right;
     int bottom;
-}image_rect_t; 
+}image_rect_t_ret; 
 
 typedef struct {
     int x;
@@ -47,7 +47,7 @@ typedef struct {
 }point_t;
 
 typedef struct {
-    image_rect_t box;
+    image_rect_t_ret box;
     float prop;
     point_t point[5];
 } object_detect_result;

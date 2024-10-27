@@ -18,10 +18,10 @@ typedef struct {
     int top;
     int right;
     int bottom;
-} image_rect_t;
+} image_rect_t_post;
 
 typedef struct {
-    image_rect_t box;
+    image_rect_t_post box;
     float prop;
     int cls_id;
 } object_detect_result;
