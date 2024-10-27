@@ -109,7 +109,6 @@ void display_image_on_lcd()
 
 	// 显示图像的缓冲区
 	cv::Mat disp;
-	unsigned int* framebuffer = get_framebuffer(); 	//	获取帧缓冲区地址
 	int disp_height = get_framebuffer_height();		//  获取屏幕高度
 	int disp_width = get_framebuffer_width();		//  获取屏幕宽度
 	int pixel_size = get_framebuffer_pixel_size();	//  获取像素大小
@@ -135,7 +134,7 @@ void display_image_on_lcd()
 		cv::Mat resized_frame;
 		cv::resize(frame, resized_frame, cv::Size(disp_width, disp_height));
 		cv::cvtColor(resized_frame, disp, cv::COLOR_RGB2BGR565);
-		memcpy(framebuffer, disp.data, disp_width * disp_height * pixel_size);
+		framebuffer_set_frame((uint16_t*)disp.data, disp_width, disp_height);
 	}	
 }
 

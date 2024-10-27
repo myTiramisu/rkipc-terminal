@@ -1,17 +1,10 @@
 #include "framebuffer.h"
-#include <fcntl.h>
-#include <stdio.h>
-#include <linux/fb.h>
-#include <sys/ioctl.h>
-#include <sys/mman.h>
-#include <stdint.h>
-#include <unistd.h>
 
 // frameBuff 全局变量
 static int fd = -1;                         // Framebuffer 文件描述符
 static struct fb_fix_screeninfo fb_fix;     // 固定屏幕信息
 static struct fb_var_screeninfo fb_var;     // 可变屏幕信息
-uint8_t* framebuffer = NULL;                // 显示缓冲区
+static uint8_t *framebuffer = NULL;           // 显示缓冲区
 static size_t screensize = 0;               // 显示缓冲区大小
 int pixel_size = 0;     // 像素深度
 int disp_width = 0;     // 显示宽度
@@ -19,7 +12,7 @@ int disp_height = 0;    // 显示高度
 
 // 初始化帧缓冲区 内存映射
 // 0: 成功  -1 失败
-int init_framebuffer() 
+int init_framebuffer(void) 
 {
     // 打开帧缓冲区设备
     fd = open(FB_DEVICE, O_RDWR);
@@ -68,19 +61,32 @@ void framebuffer_deinit(void)
     return;
 }
 
-int get_framebuffer_pixel_size() {
-    return pixel_size;
-}
 
-int get_framebuffer_width() {
+int get_framebuffer_width(void) {
     return disp_width;
 }
 
-int get_framebuffer_height() {
+int get_framebuffer_height(void) {
     return disp_height;
 }
-
-unsigned int *get_framebuffer()
+int get_framebuffer_pixel_size(void)
 {
-    return (unsigned int *)framebuffer;
+    return pixel_size;
+}
+
+// 设置显示缓冲区的像素大小  传入参数frame 映射到framebuffer
+int framebuffer_set_frame(uint16_t *frame, int width, int height)     
+{
+    if (fd == -1) {
+        // 显示缓冲区未初始化
+        perror("Framebuffer not initialized\n");
+        return -1;
+    }
+    if (fb_var.bits_per_pixel / 8 == 2)
+        memcpy(framebuffer, frame, width * height * 2);
+    else {
+        perror("unsupported pixel size\n");
+        return -1;
+    }
+    return 0;
 }
