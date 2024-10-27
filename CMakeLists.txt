@@ -42,8 +42,14 @@ find_package(Threads REQUIRED)
 
 # 源文件
 set(SRC_DIR "${EXAMPLE_DIR}/src")
-file(GLOB SRC_FILES "${SRC_DIR}/*.cc")
+set(CODE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/code")
+# 确保包含 framebuffer.cpp
+file(GLOB SRC_FILES "${SRC_DIR}/*.cc" 
+                    "${CODE_DIR}/framebuffer.c"
+)  
 add_executable(${PROJECT_NAME} ${SRC_FILES})
+
+
 
 add_compile_options(-g -Wall
                     -DISP_HW_V30 -DRKPLATFORM=ON -DARCH64=OFF
@@ -72,9 +78,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE
                             ${CMAKE_CURRENT_SOURCE_DIR}
                             ${CMAKE_CURRENT_SOURCE_DIR}/utils
                             ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/rknpu2/include
-                            ${CMAKE_CURRENT_SOURCE_DIR}/common 
+                            ${CMAKE_CURRENT_SOURCE_DIR}/common
                             ${CMAKE_CURRENT_SOURCE_DIR}/common/isp3.x   
                             ${CMAKE_CURRENT_SOURCE_DIR}/include
+                            ${CMAKE_CURRENT_SOURCE_DIR}/code
                             ${CMAKE_CURRENT_SOURCE_DIR}/include/rknn
                             ${CMAKE_CURRENT_SOURCE_DIR}/include/rkaiq
                             ${CMAKE_CURRENT_SOURCE_DIR}/include/rkaiq/uAPI2

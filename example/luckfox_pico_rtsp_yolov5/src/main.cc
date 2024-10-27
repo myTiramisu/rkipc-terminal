@@ -20,7 +20,10 @@
 #include <thread>
 
 // lcd
-#include "framebuff.h"
+
+extern "C" {
+    #include "framebuffer.h"
+}
 
 #include <sys/types.h>
 #include <sys/stat.h>

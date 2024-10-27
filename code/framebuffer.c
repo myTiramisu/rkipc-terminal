@@ -1,4 +1,4 @@
-#include "framebuff.h"
+#include "framebuffer.h"
 #include <fcntl.h>
 #include <stdio.h>
 #include <linux/fb.h>
@@ -6,7 +6,7 @@
 #include <sys/mman.h>
 #include <stdint.h>
 #include <unistd.h>
-    
+
 // frameBuff 全局变量
 static int fd = -1;                         // Framebuffer 文件描述符
 static struct fb_fix_screeninfo fb_fix;     // 固定屏幕信息
