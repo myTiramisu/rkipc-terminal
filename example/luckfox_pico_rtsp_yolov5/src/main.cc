@@ -20,6 +20,8 @@
 #include <thread>
 
 // lcd
+#include "framebuff.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -95,57 +97,26 @@ bool frame_ready = false;
 cv::Mat frame;		
 void display_image_on_lcd() 
 {
-	int disp_flag = 0;
-	void* framebuffer = NULL; 
-	
-	int pixel_size = 0;
-	int disp_width = 0;
-	int disp_height = 0;
+	// 初始化帧缓冲区
+	int ret = init_framebuffer();
+	if (ret < 0) {
+		perror("open fb error\n");
+		return ;
+	}
+
+	// 显示图像的缓冲区
 	cv::Mat disp;
-
-	//Init fb  初始化帧缓冲区
-    size_t screensize = 0;
-
-    struct fb_fix_screeninfo fb_fix;
-    struct fb_var_screeninfo fb_var;
+	unsigned int* framebuffer = get_framebuffer(); 	//	获取帧缓冲区地址
+	int disp_height = get_framebuffer_height();		//  获取屏幕高度
+	int disp_width = get_framebuffer_width();		//  获取屏幕宽度
+	int pixel_size = get_framebuffer_pixel_size();	//  获取像素大小
+    printf("Screen width = %d, Screen height = %d, Pixel_size = %d\n",disp_width, disp_height, pixel_size);
     
-
-    int fb = open("/dev/fb0", O_RDWR); 
-    if(fb == -1)
-        printf("Screen OFF!\n");
-    else 
-        disp_flag = 1;
-    
-    if(disp_flag)
-	{
-        ioctl(fb, FBIOGET_VSCREENINFO, &fb_var);
-        ioctl(fb, FBIOGET_FSCREENINFO, &fb_fix);
-
-        disp_width = fb_var.xres;
-        disp_height = fb_var.yres;  
-        pixel_size = fb_var.bits_per_pixel / 8;
-        printf("Screen width = %d, Screen height = %d, Pixel_size = %d\n",disp_width, disp_height, pixel_size);
-        
-        screensize = disp_width * disp_height * pixel_size;
-        framebuffer = (uint8_t*)mmap(NULL, screensize, PROT_READ | PROT_WRITE, MAP_SHARED, fb, 0);
-        
-        if( pixel_size == 4 )			//ARGB8888
-		{
-			disp = cv::Mat(disp_height, disp_width, CV_8UC4);
-			std::cout << "*****************frame.type(): CV_8UC4" << std::endl;		
-		}
-            
-        else if ( pixel_size == 2 ) 	//RGB565
-		{
-			disp = cv::Mat(disp_height, disp_width, CV_16UC1); 	// tnis
-			std::cout << "*****************frame.type(): CV_16UC1" << std::endl;	
-		}
-		std::cout << "*****************disp_flag set success" << std::endl;
-    }
-    else {
-        disp_height = 240;
-        disp_width = 240;
-    }
+	// 获取帧缓冲区位深度大小 设置颜色
+	if( pixel_size == 4 )			//ARGB8888
+		disp = cv::Mat(disp_height, disp_width, CV_8UC4);	// BGRX
+    else if ( pixel_size == 2 ) 	//RGB565
+		disp = cv::Mat(disp_height, disp_width, CV_16UC1); 	// GRAY
 
 	while (1)
 	{
@@ -157,15 +128,11 @@ void display_image_on_lcd()
 		frame_ready = false;
 		lock.unlock(); 			// 释放锁
 		std::cout << "显示图像到LCD" << std::endl;
-
-		if(disp_flag)
-		{
-			// 修改frame帧到LCD的大小
-			cv::Mat resized_frame;
-			cv::resize(frame, resized_frame, cv::Size(disp_width, disp_height));
-			cv::cvtColor(resized_frame, disp, cv::COLOR_RGB2BGR565);
-			memcpy(framebuffer, disp.data, disp_width * disp_height * pixel_size);
-		}
+		// 修改frame帧到LCD的大小
+		cv::Mat resized_frame;
+		cv::resize(frame, resized_frame, cv::Size(disp_width, disp_height));
+		cv::cvtColor(resized_frame, disp, cv::COLOR_RGB2BGR565);
+		memcpy(framebuffer, disp.data, disp_width * disp_height * pixel_size);
 	}	
 }
 
