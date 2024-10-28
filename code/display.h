@@ -13,7 +13,7 @@ class Display
 public:
     Display();
     ~Display();
-
+ 
     void push_frame(const cv::Mat& frame);   // 接收帧并将其放入队列
 
 private:
