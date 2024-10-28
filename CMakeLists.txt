@@ -45,7 +45,8 @@ set(SRC_DIR "${EXAMPLE_DIR}/src")
 set(CODE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/code")
 # 确保包含 framebuffer.cpp
 file(GLOB SRC_FILES "${SRC_DIR}/*.cc" 
-                    "${CODE_DIR}/framebuffer.c"
+                    "${CODE_DIR}/*.c"
+                    "${CODE_DIR}/*.cc"
 )  
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 

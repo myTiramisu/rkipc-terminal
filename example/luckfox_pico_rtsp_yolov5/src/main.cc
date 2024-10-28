@@ -20,10 +20,8 @@
 #include <thread>
 
 // lcd
+#include "display.h"
 
-extern "C" {
-    #include "framebuffer.h"
-}
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -41,8 +39,6 @@ extern "C" {
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
-#include <mutex>
-#include <condition_variable>
 
 // disp size
 int width    = 720;
@@ -89,53 +85,6 @@ void mapCoordinates(int *x, int *y) {
 
     *x = (int)((float)mx / scale);
     *y = (int)((float)my / scale);
-}
-
-
-// 互斥锁和条件变量
-std::mutex frame_mutex;
-std::condition_variable frame_cond;
-bool frame_ready = false;
-// 临界资源 主线程负责生产 子线程负责消费
-cv::Mat frame;		
-void display_image_on_lcd() 
-{
-	// 初始化帧缓冲区
-	int ret = init_framebuffer();
-	if (ret < 0) {
-		perror("open fb error\n");
-		return ;
-	}
-
-	// 显示图像的缓冲区
-	cv::Mat disp;
-	int disp_height = get_framebuffer_height();		//  获取屏幕高度
-	int disp_width = get_framebuffer_width();		//  获取屏幕宽度
-	int pixel_size = get_framebuffer_pixel_size();	//  获取像素大小
-    printf("Screen width = %d, Screen height = %d, Pixel_size = %d\n",disp_width, disp_height, pixel_size);
-    
-	// 获取帧缓冲区位深度大小 设置颜色
-	if( pixel_size == 4 )			//ARGB8888
-		disp = cv::Mat(disp_height, disp_width, CV_8UC4);	// BGRX
-    else if ( pixel_size == 2 ) 	//RGB565
-		disp = cv::Mat(disp_height, disp_width, CV_16UC1); 	// GRAY
-
-	while (1)
-	{
-		// 等待条件变量 等主线程完成后 LCD显示图像
-		std::unique_lock<std::mutex> lock(frame_mutex);
-		while (!frame_ready) {
-    		frame_cond.wait(lock); // 等待条件变量
-		}
-		frame_ready = false;
-		lock.unlock(); 			// 释放锁
-		std::cout << "显示图像到LCD" << std::endl;
-		// 修改frame帧到LCD的大小
-		cv::Mat resized_frame;
-		cv::resize(frame, resized_frame, cv::Size(disp_width, disp_height));
-		cv::cvtColor(resized_frame, disp, cv::COLOR_RGB2BGR565);
-		framebuffer_set_frame((uint16_t*)disp.data, disp_width, disp_height);
-	}	
 }
 
 int main(int argc, char *argv[]) 
@@ -218,8 +167,8 @@ int main(int argc, char *argv[])
 	venc_init(0, width, height, enCodecType);
 	printf("\n************************venc init success\n");	
 
-	// 创建一个新的线程 用于LCD显示图像
-	std::thread lcd_thread(display_image_on_lcd);
+	// 实例化LCD对象
+	Display lcd;	
 
   	while(1)
 	{	
@@ -227,50 +176,48 @@ int main(int argc, char *argv[])
 		s32Ret = RK_MPI_VPSS_GetChnFrame(0,0, &stVpssFrame,-1);
 		if(s32Ret == RK_SUCCESS)
 		{
-			 // 加锁
-			std::lock_guard<std::mutex> lock(frame_mutex); 
-			{
-				void *data = RK_MPI_MB_Handle2VirAddr(stVpssFrame.stVFrame.pMbBlk);	
-				//opencv	
-				//将帧转换为OpenCV格式
-				frame = cv::Mat(height,width,CV_8UC3,data);			
-				//letterbox
-				cv::Mat letterboxImage = letterbox(frame);	
-				memcpy(rknn_app_ctx.input_mems[0]->virt_addr, letterboxImage.data, model_width*model_height*3);		
-				inference_yolov5_model(&rknn_app_ctx, &od_results);
-				
-				for(int i = 0; i < od_results.count; i++)
-				{					
-					//获取框的四个坐标 
-					if(od_results.count >= 1)
-					{
-						object_detect_result *det_result = &(od_results.results[i]);
-						printf("%s @ (%d %d %d %d) %.3f\n", coco_cls_to_name(det_result->cls_id),
-								det_result->box.left, det_result->box.top,
-								det_result->box.right, det_result->box.bottom,
-								det_result->prop);
-		
-						sX = (int)(det_result->box.left   );	
-						sY = (int)(det_result->box.top 	  );	
-						eX = (int)(det_result->box.right  );	
-						eY = (int)(det_result->box.bottom );
-						mapCoordinates(&sX,&sY);
-						mapCoordinates(&eX,&eY);
+			void *data = RK_MPI_MB_Handle2VirAddr(stVpssFrame.stVFrame.pMbBlk);	
+			//opencv	
+			//将帧转换为OpenCV格式
+			cv::Mat frame(height,width,CV_8UC3,data);			
+			//letterbox
+			cv::Mat letterboxImage = letterbox(frame);	
+			memcpy(rknn_app_ctx.input_mems[0]->virt_addr, letterboxImage.data, model_width*model_height*3);		
+			inference_yolov5_model(&rknn_app_ctx, &od_results);
+			
+			for(int i = 0; i < od_results.count; i++)
+			{					
+				//获取框的四个坐标 
+				if(od_results.count >= 1)
+				{
+					object_detect_result *det_result = &(od_results.results[i]);
+					printf("%s @ (%d %d %d %d) %.3f\n", coco_cls_to_name(det_result->cls_id),
+							det_result->box.left, det_result->box.top,
+							det_result->box.right, det_result->box.bottom,
+							det_result->prop);
+	
+					sX = (int)(det_result->box.left   );	
+					sY = (int)(det_result->box.top 	  );	
+					eX = (int)(det_result->box.right  );	
+					eY = (int)(det_result->box.bottom );
+					mapCoordinates(&sX,&sY);
+					mapCoordinates(&eX,&eY);
 
-						cv::rectangle(frame,cv::Point(sX ,sY),
-											cv::Point(eX ,eY),
-											cv::Scalar(0,255,0),3);
-						sprintf(text, "%s %.1f%%", coco_cls_to_name(det_result->cls_id), det_result->prop * 100);
-						cv::putText(frame,text,cv::Point(sX, sY - 8),
-													cv::FONT_HERSHEY_SIMPLEX,1,
-													cv::Scalar(0,255,0),2);
-					}
+					cv::rectangle(frame,cv::Point(sX ,sY),
+										cv::Point(eX ,eY),
+										cv::Scalar(0,255,0),3);
+					sprintf(text, "%s %.1f%%", coco_cls_to_name(det_result->cls_id), det_result->prop * 100);
+					cv::putText(frame,text,cv::Point(sX, sY - 8),
+												cv::FONT_HERSHEY_SIMPLEX,1,
+												cv::Scalar(0,255,0),2);
 				}
-				memcpy(data, frame.data, width * height * 3);
-				frame_ready = true;
 			}
-			// C++通知线程处理完一帧
-			frame_cond.notify_one();
+			memcpy(data, frame.data, width * height * 3);
+			// 调整图像大小	frame.cols:128 		frame.rows:160
+
+    		cv::Mat dst;
+    		cv::resize(frame, dst, cv::Size(160, 128));
+			lcd.push_frame(dst);
 		}
 
 		// send stream
@@ -328,6 +275,5 @@ int main(int argc, char *argv[])
     release_yolov5_model(&rknn_app_ctx);		
 	deinit_post_process();
 	
-	lcd_thread.join();
 	return 0;
 }
