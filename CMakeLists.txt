@@ -75,6 +75,7 @@ target_link_libraries(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME} PRIVATE                        
                             ${OpenCV_INCLUDE_DIRS}
+                            ${CMAKE_CURRENT_SOURCE_DIR}/code
                             ${EXAMPLE_DIR}/include
                             ${CMAKE_CURRENT_SOURCE_DIR}
                             ${CMAKE_CURRENT_SOURCE_DIR}/utils
@@ -82,7 +83,6 @@ target_include_directories(${PROJECT_NAME} PRIVATE
                             ${CMAKE_CURRENT_SOURCE_DIR}/common
                             ${CMAKE_CURRENT_SOURCE_DIR}/common/isp3.x   
                             ${CMAKE_CURRENT_SOURCE_DIR}/include
-                            ${CMAKE_CURRENT_SOURCE_DIR}/code
                             ${CMAKE_CURRENT_SOURCE_DIR}/include/rknn
                             ${CMAKE_CURRENT_SOURCE_DIR}/include/rkaiq
                             ${CMAKE_CURRENT_SOURCE_DIR}/include/rkaiq/uAPI2
@@ -92,6 +92,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
                             ${CMAKE_CURRENT_SOURCE_DIR}/include/rkaiq/iq_parser
                             ${CMAKE_CURRENT_SOURCE_DIR}/include/rkaiq/iq_parser_v2
                             ${CMAKE_CURRENT_SOURCE_DIR}/include/rkaiq/smartIr
+                           
                           )
                           
 

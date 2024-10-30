@@ -115,10 +115,11 @@ typedef enum rkMOD_ID_E {
   RK_ID_BUTT,
 } MOD_ID_E;
 
+// 多媒体处理通道结构体
 typedef struct rkMPP_CHN_S {
-  MOD_ID_E enModId;
-  RK_S32 s32DevId;
-  RK_S32 s32ChnId;
+  MOD_ID_E enModId;    // 模块ID
+  RK_S32 s32DevId;     // 设备ID
+  RK_S32 s32ChnId;     // 通道ID
 } MPP_CHN_S;
 
 #define RK_MOD_CMPI "cmpi"

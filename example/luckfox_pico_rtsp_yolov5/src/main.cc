@@ -21,6 +21,8 @@
 
 // lcd
 #include "display.h"
+#include "video.h"
+
 
 
 #include <sys/types.h>
@@ -95,6 +97,9 @@ int main(int argc, char *argv[])
 	
 	// Ctrl-c quit
 	// signal(SIGINT, sigterm_handler);
+	// 实例化LCD对象
+	Display lcd;
+	Video video;
 
 	// Rknn model
 	char text[16];
@@ -106,12 +111,16 @@ int main(int argc, char *argv[])
 	init_yolov5_model(model_path, &rknn_app_ctx);
 	printf("\ninit rknn model success!\n");
 	init_post_process();
+	
 	//h264_frame	
 	VENC_STREAM_S stFrame;	
 	stFrame.pstPack = (VENC_PACK_S *)malloc(sizeof(VENC_PACK_S));
  	VIDEO_FRAME_INFO_S h264_frame;
  	VIDEO_FRAME_INFO_S stVpssFrame;
 	printf("\n************************Init h264_frame  success!\n");
+
+	
+
 
 	// rkaiq init
 	RK_BOOL multi_sensor = RK_FALSE;	
@@ -162,13 +171,13 @@ int main(int argc, char *argv[])
 	}
 	printf("\n************************RK_MPI_SYS_Bind  success!\n");
 
+	
+
 	// venc init 初始化视频编码器
 	RK_CODEC_ID_E enCodecType = RK_VIDEO_ID_AVC;
 	venc_init(0, width, height, enCodecType);
 	printf("\n************************venc init success\n");	
-
-	// 实例化LCD对象
-	Display lcd;	
+	
 
   	while(1)
 	{	
@@ -214,16 +223,15 @@ int main(int argc, char *argv[])
 			}
 			memcpy(data, frame.data, width * height * 3);
 			// 调整图像大小	frame.cols:128 		frame.rows:160
-
     		cv::Mat dst;
     		cv::resize(frame, dst, cv::Size(160, 128));
-			lcd.push_frame(dst);
+			// lcd.push_frame(dst);
 		}
 
 		// send stream
-		// encode H264
+		// encode H264	将原始视频帧发送到编码器进行编码
 		RK_MPI_VENC_SendFrame(0, &stVpssFrame,-1);
-		// rtsp
+		// rtsp			从编码器中获取已经编码好的视频流。
 		s32Ret = RK_MPI_VENC_GetStream(0, &stFrame, -1);
 		if(s32Ret == RK_SUCCESS)
 		{
@@ -243,13 +251,13 @@ int main(int argc, char *argv[])
 		if (s32Ret != RK_SUCCESS) {
 			RK_LOGE("RK_MPI_VI_ReleaseChnFrame fail %x", s32Ret);
 		}
+
 		s32Ret = RK_MPI_VENC_ReleaseStream(0, &stFrame);
 		if (s32Ret != RK_SUCCESS) {
 			RK_LOGE("RK_MPI_VENC_ReleaseStream fail %x", s32Ret);
 		}
 		memset(text,0,8);
 	}
-
 
 	printf("Release\n");
 	RK_MPI_SYS_UnBind(&stSrcChn, &stvpssChn);

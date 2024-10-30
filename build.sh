@@ -12,7 +12,6 @@ if [ "$1" = "clean" ]; then
 		rm -rf "${ROOT_PWD}/install"
 		echo " ${ROOT_PWD}/install has been deleted!"
 	fi
-
 	exit
 fi
 
