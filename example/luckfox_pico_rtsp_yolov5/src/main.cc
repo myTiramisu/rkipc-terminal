@@ -21,7 +21,8 @@
 
 // lcd
 #include "display.h"
-#include "video.h"
+
+// #include "video.h"
 
 
 
@@ -98,8 +99,9 @@ int main(int argc, char *argv[])
 	// Ctrl-c quit
 	// signal(SIGINT, sigterm_handler);
 	// 实例化LCD对象
-	Display lcd;
-	Video video;
+		
+	// Video video;
+	// Display lcd;
 
 	// Rknn model
 	char text[16];
@@ -120,8 +122,6 @@ int main(int argc, char *argv[])
 	printf("\n************************Init h264_frame  success!\n");
 
 	
-
-
 	// rkaiq init
 	RK_BOOL multi_sensor = RK_FALSE;	
 	const char *iq_dir = "/etc/iqfiles";

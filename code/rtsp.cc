@@ -1,4 +1,8 @@
 #include "rtsp.h"
+#include <thread>
+#include "rtsp_demo.h"
+#include "rk_mpi_venc.h"
+#include "rk_mpi_mb.h"
 
 
 pthread_mutex_t g_mutex;

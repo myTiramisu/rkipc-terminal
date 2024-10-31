@@ -1,7 +1,5 @@
 #include "video.h"
 
-
-
 Video::Video()
 {
     rkaiq_init();
