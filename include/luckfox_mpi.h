@@ -30,9 +30,9 @@ RK_U64 TEST_COMM_GetNowUs();
 RK_S32 test_rgn_overlay_line_process(int sX ,int sY,int type, int group);
 RK_S32 rgn_overlay_release(int group);
 
-int vi_dev_init();
-int vi_chn_init(int channelId, int width, int height);
-int vpss_init(int VpssChn, int width, int height);
-int venc_init(int chnId, int width, int height, RK_CODEC_ID_E enType);
+// int vi_dev_init();
+// int vi_chn_init(int channelId, int width, int height);
+// int vpss_init(int VpssChn, int width, int height);
+// int venc_init(int chnId, int width, int height, RK_CODEC_ID_E enType);
 
 #endif

@@ -25,13 +25,13 @@ int vi_dev_init() {
 	// 1.get dev enable status
 	ret = RK_MPI_VI_GetDevIsEnable(devId);
 	if (ret != RK_SUCCESS) {
-		// 1-2.enable dev
+		// 3. 启动 VI 设备
 		ret = RK_MPI_VI_EnableDev(devId);
 		if (ret != RK_SUCCESS) {
 			printf("RK_MPI_VI_EnableDev %x\n", ret);
 			return -1;
 		}
-		// 1-3.bind dev/pipe
+		// 4. 绑定 VI 设备与 VI 管道
 		stBindPipe.u32Num = pipeId;
 		stBindPipe.PipeId[0] = pipeId;
 		ret = RK_MPI_VI_SetDevBindPipe(devId, &stBindPipe);
@@ -45,6 +45,7 @@ int vi_dev_init() {
 
 	return 0;
 }
+
 
 int vi_chn_init(int channelId, int width, int height) {
 	int ret;
@@ -60,6 +61,7 @@ int vi_chn_init(int channelId, int width, int height) {
 	vi_chn_attr.enPixelFormat = RK_FMT_YUV420SP;
 	vi_chn_attr.enCompressMode = COMPRESS_MODE_NONE; // COMPRESS_AFBC_16x16;
 	vi_chn_attr.u32Depth = 2;
+	// 5. 设置 VI 通道属性
 	ret = RK_MPI_VI_SetChnAttr(0, channelId, &vi_chn_attr);
 	ret |= RK_MPI_VI_EnableChn(0, channelId);
 	if (ret) {
@@ -73,8 +75,8 @@ int vi_chn_init(int channelId, int width, int height) {
 int vpss_init(int VpssChn, int width, int height) {
 	printf("%s\n",__func__);
 	int s32Ret;
-	VPSS_CHN_ATTR_S stVpssChnAttr;
-	VPSS_GRP_ATTR_S stGrpVpssAttr;
+	VPSS_GRP_ATTR_S stGrpVpssAttr;	// VPSS 组属性
+	VPSS_CHN_ATTR_S stVpssChnAttr;	// VPSS 通道属性
 
 	int s32Grp = 0;
 
@@ -94,20 +96,22 @@ int vpss_init(int VpssChn, int width, int height) {
 	stVpssChnAttr.u32Height = height;
 	stVpssChnAttr.enCompressMode = COMPRESS_MODE_NONE;
 
+	// 1. 创建 VPSS 组
 	s32Ret = RK_MPI_VPSS_CreateGrp(s32Grp, &stGrpVpssAttr);
 	if (s32Ret != RK_SUCCESS) {
 		return s32Ret;
 	}
-
+	// 2. 设置 VPSS 通道属性
 	s32Ret = RK_MPI_VPSS_SetChnAttr(s32Grp, VpssChn, &stVpssChnAttr);
 	if (s32Ret != RK_SUCCESS) {
 		return s32Ret;
 	}
+	// 3. 启动 VPSS 通道
 	s32Ret = RK_MPI_VPSS_EnableChn(s32Grp, VpssChn);
 	if (s32Ret != RK_SUCCESS) {
 		return s32Ret;
 	}
-
+	// 4. 启动 VPSS 组
 	s32Ret = RK_MPI_VPSS_StartGrp(s32Grp);
 	if (s32Ret != RK_SUCCESS) {
 		return s32Ret;

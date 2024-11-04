@@ -15,15 +15,14 @@
 #include <vector>
 #include <iostream>
 #include "rtsp_demo.h"
-#include "luckfox_mpi.h"
+// #include "luckfox_mpi.h"
 #include "yolov5.h"
 #include <thread>
 
 // lcd
 #include "display.h"
-
-// #include "video.h"
-
+#include "video.h"
+#include "luckfox_video.h"
 
 
 #include <sys/types.h>
@@ -55,10 +54,10 @@ int leftPadding ;
 int topPadding  ;
 
 bool quit = false;
-// static void sigterm_handler(int sig) {
-// 	fprintf(stderr, "signal %d\n", sig);
-// 	quit = true;
-// }
+static void sigterm_handler(int sig) {
+	fprintf(stderr, "signal %d\n", sig);
+	quit = true;
+}
 
 cv::Mat letterbox(cv::Mat input)
 {
@@ -97,12 +96,13 @@ int main(int argc, char *argv[])
 	int sX,sY,eX,eY; 
 	
 	// Ctrl-c quit
-	// signal(SIGINT, sigterm_handler);
-	// 实例化LCD对象
-		
-	// Video video;
-	// Display lcd;
+	signal(SIGINT, sigterm_handler);
+	
+	//实例化对象	
+	Video video;
+	Display lcd;
 
+/*
 	// Rknn model
 	char text[16];
 	rknn_app_context_t rknn_app_ctx;	
@@ -120,16 +120,32 @@ int main(int argc, char *argv[])
  	VIDEO_FRAME_INFO_S h264_frame;
  	VIDEO_FRAME_INFO_S stVpssFrame;
 	printf("\n************************Init h264_frame  success!\n");
-
 	
+	// 视频vi输入
 	// rkaiq init
 	RK_BOOL multi_sensor = RK_FALSE;	
 	const char *iq_dir = "/etc/iqfiles";
 	rk_aiq_working_mode_t hdr_mode = RK_AIQ_WORKING_MODE_NORMAL;
 	//hdr_mode = RK_AIQ_WORKING_MODE_ISP_HDR2;
+	// 1. 启动ISP 算法实现自动曝光控制、自动增益控制、自动白平衡、色彩校正等操作，保证捕获图像的质量
+	// SAMPLE_COMM_ISP_Init(CamId, hdr_mode, multi_sensor, iq_dir);
 	SAMPLE_COMM_ISP_Init(0, hdr_mode, multi_sensor, iq_dir);
-	SAMPLE_COMM_ISP_Run(0);
-	printf("\n************************Init rkaiq  success!\n");
+	// 2. 运行 ISP 算法
+	SAMPLE_COMM_ISP_Run(0);	//  摄像头 ID
+	// vi init	 初始化视频输入设备和通道 
+	vi_dev_init();						
+	// RK_MPI_VI_EnableDev 启动VI设备 初始化通道 vi_chn_init(int channelId, int width, int height) 
+	vi_chn_init(0, width, height);
+	printf("\n************************Init vi success!\n");
+
+	// vpss init 	初始化视频处理子系统
+	vpss_init(0, width, height);
+	printf("\n************************vpss_init success\n");
+
+	// venc init 初始化视频编码器
+	RK_CODEC_ID_E enCodecType = RK_VIDEO_ID_AVC;		// 设置编码类型为 H264
+	venc_init(0, width, height, enCodecType);
+	printf("\n************************venc init success\n");	
 
 	// rkmpi init
 	if (RK_MPI_SYS_Init() != RK_SUCCESS) {
@@ -137,6 +153,7 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	printf("\n************************Init rkmpi  success!\n");
+
 
 	// rtsp init	创建RTSP直播演示，并初始化RTSP会话
 	rtsp_demo_handle g_rtsplive = NULL;
@@ -147,12 +164,6 @@ int main(int argc, char *argv[])
 	rtsp_sync_video_ts(g_rtsp_session, rtsp_get_reltime(), rtsp_get_ntptime());
 	printf("\n************************Init rtsp  success!\n");
 
-	// vi init	 	初始化视频输入设备和通道
-	vi_dev_init();
-	vi_chn_init(0, width, height);
-	
-	// vpss init 	初始化视频处理子系统
-	vpss_init(0, width, height);
 
 	// bind vi to vpss  	绑定视频输入通道到视频处理子系统通道
 	MPP_CHN_S stSrcChn, stvpssChn;
@@ -170,21 +181,17 @@ int main(int argc, char *argv[])
 		return -1;
 	}
 	printf("\n************************RK_MPI_SYS_Bind  success!\n");
+*/
 
-	
-
-	// venc init 初始化视频编码器
-	RK_CODEC_ID_E enCodecType = RK_VIDEO_ID_AVC;
-	venc_init(0, width, height, enCodecType);
-	printf("\n************************venc init success\n");	
-	
-
-  	while(1)
+  	while(!quit)
 	{	
+		sleep(1);
+/*
 		// 获取VPSS帧
 		s32Ret = RK_MPI_VPSS_GetChnFrame(0,0, &stVpssFrame,-1);
 		if(s32Ret == RK_SUCCESS)
 		{
+			// 获取 VENC 帧内存块虚拟地址
 			void *data = RK_MPI_MB_Handle2VirAddr(stVpssFrame.stVFrame.pMbBlk);	
 			//opencv	
 			//将帧转换为OpenCV格式
@@ -225,7 +232,7 @@ int main(int argc, char *argv[])
 			// 调整图像大小	frame.cols:128 		frame.rows:160
     		cv::Mat dst;
     		cv::resize(frame, dst, cv::Size(160, 128));
-			// lcd.push_frame(dst);
+			lcd.push_frame(dst);
 		}
 
 		// send stream
@@ -257,31 +264,32 @@ int main(int argc, char *argv[])
 			RK_LOGE("RK_MPI_VENC_ReleaseStream fail %x", s32Ret);
 		}
 		memset(text,0,8);
+*/
 	}
-
-	printf("Release\n");
-	RK_MPI_SYS_UnBind(&stSrcChn, &stvpssChn);
+	// printf("Release\n");
+	// RK_MPI_SYS_UnBind(&stSrcChn, &stvpssChn);
 	
-	RK_MPI_VI_DisableChn(0, 0);
-	RK_MPI_VI_DisableDev(0);
+	// RK_MPI_VI_DisableChn(0, 0);
+	// RK_MPI_VI_DisableDev(0);
 	
-	RK_MPI_VPSS_StopGrp(0);
-	RK_MPI_VPSS_DestroyGrp(0);
+	// RK_MPI_VPSS_StopGrp(0);
+	// RK_MPI_VPSS_DestroyGrp(0);
 	
-	RK_MPI_VENC_StopRecvFrame(0);
-	RK_MPI_VENC_DestroyChn(0);
+	// RK_MPI_VENC_StopRecvFrame(0);
+	// RK_MPI_VENC_DestroyChn(0);
 
-	free(stFrame.pstPack);
+	// free(stFrame.pstPack);
 
-	if (g_rtsplive)
-		rtsp_del_demo(g_rtsplive);
-	SAMPLE_COMM_ISP_Stop(0);
+	// // if (g_rtsplive)
+	// // 	rtsp_del_demo(g_rtsplive);
+	// SAMPLE_COMM_ISP_Stop(0);
 
-	RK_MPI_SYS_Exit();
+	// RK_MPI_SYS_Exit();
 
-	// Release rknn model
-    release_yolov5_model(&rknn_app_ctx);		
-	deinit_post_process();
+	// // Release rknn model
+    // release_yolov5_model(&rknn_app_ctx);		
+	// deinit_post_process();
+
 	
 	return 0;
 }

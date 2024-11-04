@@ -13,15 +13,17 @@ rtsp_session_handle g_rtsp_session0,g_rtsp_session1,g_rtsp_session2;
 
 void rtsp_init(void)
 {
+    // 1. 创建 rtsp 实例
 	g_rtsplive = create_rtsp_demo(554);
+    // 2. 创建 rtsp 接口
 	g_rtsp_session0 = rtsp_new_session(g_rtsplive, "/live/0");
     g_rtsp_session1 = rtsp_new_session(g_rtsplive, "/live/1");
     g_rtsp_session2 = rtsp_new_session(g_rtsplive, "/live/2");
-
+    // 3. 设置 rtsp 传输属性 H264
 	rtsp_set_video(g_rtsp_session0, RTSP_CODEC_ID_VIDEO_H264, NULL, 0);
     rtsp_set_video(g_rtsp_session1, RTSP_CODEC_ID_VIDEO_H264, NULL, 0);
     rtsp_set_video(g_rtsp_session2, RTSP_CODEC_ID_VIDEO_H264, NULL, 0);
-
+    // 4. 同步 rtsp 时间戳
     rtsp_sync_video_ts(g_rtsp_session0, rtsp_get_reltime(), rtsp_get_ntptime());
     rtsp_sync_video_ts(g_rtsp_session1, rtsp_get_reltime(), rtsp_get_ntptime());
 	rtsp_sync_video_ts(g_rtsp_session2, rtsp_get_reltime(), rtsp_get_ntptime());
@@ -50,19 +52,6 @@ void rtsp_release(void)
     }
 }
 
-// int rtsp_send_frame(int channelId, unsigned char* data, int size)
-// {
-//     rtsp_session_handle g_rtsp_session0,g_rtsp_session1,g_rtsp_session2;
-//     rtsp_send_video_frame(g_rtsp_session0, data, size);
-//     return 0;
-// }
-
-// int rtsp_send_frame_yuv(int channelId, unsigned char* data, int size)
-// {
-//     rtsp_session_handle g_rtsp_session0,g_rtsp_session1,g_rtsp_session2;
-//     return 0;
-// }
-
 
 int rtsp_send_frame_h264(int channelId, VENC_STREAM_S* stFrame)
 {
@@ -78,12 +67,12 @@ int rtsp_send_frame_h264(int channelId, VENC_STREAM_S* stFrame)
                 {
                     void *pData = RK_MPI_MB_Handle2VirAddr(stFrame->pstPack->pMbBlk);
                     pthread_mutex_lock(&g_mutex);
+                    // 同步 rtsp 时间戳
                     rtsp_tx_video(g_rtsp_session0, (uint8_t *)pData, stFrame->pstPack->u32Len,stFrame->pstPack->u64PTS);
                     rtsp_do_event(g_rtsplive);
                     pthread_mutex_unlock(&g_mutex);
                 }
             break;
-
 
             case 1:
                 if (g_rtsplive && g_rtsp_session1) 
@@ -95,7 +84,6 @@ int rtsp_send_frame_h264(int channelId, VENC_STREAM_S* stFrame)
                     pthread_mutex_unlock(&g_mutex);
                 }
             break;
-
 
             case 2:
                 if (g_rtsplive && g_rtsp_session2) 
@@ -109,7 +97,7 @@ int rtsp_send_frame_h264(int channelId, VENC_STREAM_S* stFrame)
             break;
         
             default:
-                printf("channelId error!");
+                printf("!!!!!!!!!!!!!!!!!!!!!channelId error!");
                 break;
         }
     }

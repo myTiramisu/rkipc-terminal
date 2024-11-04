@@ -1,4 +1,5 @@
 #include "luckfox_video.h"
+
 int vi_dev_init(void) {
 	printf("%s\n", __func__);
 	int ret = 0;
@@ -24,7 +25,7 @@ int vi_dev_init(void) {
 	// 1.get dev enable status
 	ret = RK_MPI_VI_GetDevIsEnable(devId);
 	if (ret != RK_SUCCESS) {
-		// 1-2.enable dev
+		// 3. 启动 VI 设备
 		ret = RK_MPI_VI_EnableDev(devId);
 		if (ret != RK_SUCCESS) {
 			printf("RK_MPI_VI_EnableDev %x\n", ret);
@@ -33,6 +34,7 @@ int vi_dev_init(void) {
 		// 1-3.bind dev/pipe
 		stBindPipe.u32Num = pipeId;
 		stBindPipe.PipeId[0] = pipeId;
+		// 绑定 VI 设备与 VI 管道
 		ret = RK_MPI_VI_SetDevBindPipe(devId, &stBindPipe);
 		if (ret != RK_SUCCESS) {
 			printf("RK_MPI_VI_SetDevBindPipe %x\n", ret);
@@ -44,6 +46,8 @@ int vi_dev_init(void) {
 	printf("\n***********************vi_dev_init  success!\n");
 	return 0;
 }
+
+
 int vi_dev_deinit(void)
 {
 	printf("%s\n", __func__);
@@ -73,7 +77,9 @@ int vi_chn_init(int channelId, int width, int height) {
 	vi_chn_attr.enPixelFormat = RK_FMT_YUV420SP;
 	vi_chn_attr.enCompressMode = COMPRESS_MODE_NONE; // COMPRESS_AFBC_16x16;
 	vi_chn_attr.u32Depth = 2;
+	// 5. 设置 VI 通道属性
 	ret = RK_MPI_VI_SetChnAttr(0, channelId, &vi_chn_attr);
+	// 6. 启动 VI 通道
 	ret |= RK_MPI_VI_EnableChn(0, channelId);
 	if (ret) {
 		printf("ERROR: create VI error! ret=%d\n", ret);
@@ -83,23 +89,28 @@ int vi_chn_init(int channelId, int width, int height) {
 	printf("\n************************vi_chn_init success\n");
 	return ret;
 }
-int vi_chn_deinit(int channelId) {
+
+
+int vi_chn_deinit(int pipeId, int channelId)
+{
 	int ret;
-	ret = RK_MPI_VI_DisableChn(0, channelId);
-	if(ret)
+	ret = RK_MPI_VI_DisableChn(pipeId, channelId);
+	if (ret)
 	{
-		printf("vi_chn_deinit error!");
-		return -1;
+		printf("ERROR: destroy VI error! ret=%d\n", ret);
+		return ret;
 	}
+	printf("RK_MPI_VI_DisableChn success\n");
 	return 0;
 }
 
-
-int vpss_init(int VpssChn, int width, int height) {
+// 创建 VPSS 组，并设置 VPSS 通道属性
+int vpss_init(int VpssChn, int width, int height) 	
+{
 	printf("%s\n",__func__);
 	int s32Ret;
-	VPSS_CHN_ATTR_S stVpssChnAttr;
-	VPSS_GRP_ATTR_S stGrpVpssAttr;
+	VPSS_GRP_ATTR_S stGrpVpssAttr;	// VPSS 组属性
+	VPSS_CHN_ATTR_S stVpssChnAttr;	// VPSS 通道属性
 
 	int s32Grp = 0;
 
@@ -119,52 +130,58 @@ int vpss_init(int VpssChn, int width, int height) {
 	stVpssChnAttr.u32Height = height;
 	stVpssChnAttr.enCompressMode = COMPRESS_MODE_NONE;
 
+	// 1. 创建 VPSS 组
 	s32Ret = RK_MPI_VPSS_CreateGrp(s32Grp, &stGrpVpssAttr);
 	if (s32Ret != RK_SUCCESS) {
 		return s32Ret;
 	}
-
+	// 2. 设置 VPSS 通道属性
 	s32Ret = RK_MPI_VPSS_SetChnAttr(s32Grp, VpssChn, &stVpssChnAttr);
 	if (s32Ret != RK_SUCCESS) {
 		return s32Ret;
 	}
+	// 3. 启动 VPSS 通道
 	s32Ret = RK_MPI_VPSS_EnableChn(s32Grp, VpssChn);
 	if (s32Ret != RK_SUCCESS) {
 		return s32Ret;
 	}
-
+	// 4. 启动 VPSS 组
 	s32Ret = RK_MPI_VPSS_StartGrp(s32Grp);
 	if (s32Ret != RK_SUCCESS) {
 		return s32Ret;
 	}
-
-
-	printf("\n************************venc init success\n");	
 	return s32Ret;
 }
 
 int vpss_deinit(int VpssChn) {
 	printf("%s\n",__func__);
 	int s32Ret;
-	s32Ret = RK_MPI_VPSS_DisableChn(0, VpssChn);
-	if (s32Ret != RK_SUCCESS) {
-		return s32Ret;
-	}
 	s32Ret = RK_MPI_VPSS_StopGrp(0);
+	if (s32Ret != RK_SUCCESS) {
+		printf("*************************vpss_stopGrp error!");
+		return -1;
+	}
+	s32Ret = RK_MPI_VPSS_DestroyGrp(0);
+	if (s32Ret != RK_SUCCESS) {
+		printf("*************************vpss_destroyGrp error!");
+		return -1;
+	}
 	return 0;
 }
 
-
 int venc_init(int chnId, int width, int height, RK_CODEC_ID_E enType) {
 	printf("%s\n",__func__);
+	// 获取 VENC 通道属性
 	VENC_RECV_PIC_PARAM_S stRecvParam;
-	VENC_CHN_ATTR_S stAttr;
+	// 创建 VPSS 通道
+	VENC_CHN_ATTR_S stAttr;			
 	memset(&stAttr, 0, sizeof(VENC_CHN_ATTR_S));
 
 	// RTSP H264	
 	stAttr.stVencAttr.enType = enType;
-	//stAttr.stVencAttr.enPixelFormat = RK_FMT_YUV420SP;
-	stAttr.stVencAttr.enPixelFormat = RK_FMT_RGB888;	
+	stAttr.stVencAttr.enPixelFormat = RK_FMT_YUV420SP;
+	// stAttr.stVencAttr.enPixelFormat = RK_FMT_RGB888;
+	// 设置编码类型为 H264	
 	stAttr.stVencAttr.u32Profile = H264E_PROFILE_MAIN;
 	stAttr.stVencAttr.u32PicWidth = width;
 	stAttr.stVencAttr.u32PicHeight = height;
@@ -173,14 +190,17 @@ int venc_init(int chnId, int width, int height, RK_CODEC_ID_E enType) {
 	stAttr.stVencAttr.u32StreamBufCnt = 2;
 	stAttr.stVencAttr.u32BufSize = width * height * 3 / 2;
 	stAttr.stVencAttr.enMirror = MIRROR_NONE;
-		
+	
+	// 设置 H264 编码属性 
 	stAttr.stRcAttr.enRcMode = VENC_RC_MODE_H264CBR;
 	stAttr.stRcAttr.stH264Cbr.u32BitRate = 3 * 1024;
 	stAttr.stRcAttr.stH264Cbr.u32Gop = 1;
+	// 1. 创建并设置 VENC 通道
 	RK_MPI_VENC_CreateChn(chnId, &stAttr);
 
 	memset(&stRecvParam, 0, sizeof(VENC_RECV_PIC_PARAM_S));
 	stRecvParam.s32RecvPicNum = -1;
+	// 2. 开始接收帧数据
 	RK_MPI_VENC_StartRecvFrame(chnId, &stRecvParam);
 
 	printf("\n************************venc init success\n");	
@@ -190,7 +210,11 @@ int venc_init(int chnId, int width, int height, RK_CODEC_ID_E enType) {
 int venc_deinit(int chnId) {
 	printf("%s\n",__func__);
 	int ret = RK_MPI_VENC_StopRecvFrame(chnId);
-	ret != RK_MPI_VENC_DestroyChn(chnId);
+	if (ret) {
+		printf("venc_deinit error!");
+		return -1;
+	}
+	ret = RK_MPI_VENC_DestroyChn(chnId);
 	if(ret) {
 		printf("venc_deinit error!");
 		return -1;
@@ -208,7 +232,9 @@ typedef struct rkMPP_CHN_S {
 */
 // stSrcChn:  表示从摄像头获取的原始视频流的通道
 // stvpssChn: 视频处理子系统（Video Processing Subsystem, VPSS）通道
-int bind_vi_to_vpss(MPP_CHN_S *stSrcChn, MPP_CHN_S *stvpssChn, int chnID) 
+
+// 绑定视频处理子系统通道到视频编码通道
+int bind_vi_to_vpss(int chnID, MPP_CHN_S *stSrcChn, MPP_CHN_S *stvpssChn) 
 {
 	int s32Ret;
 	
@@ -229,8 +255,60 @@ int bind_vi_to_vpss(MPP_CHN_S *stSrcChn, MPP_CHN_S *stvpssChn, int chnID)
 }
 
 
+int bind_vi_to_venc(int pipeId, MPP_CHN_S *vi_chn, MPP_CHN_S *venc_chn)
+{
+	// bind
+	int ret;
+	vi_chn->enModId = RK_ID_VI;
+	vi_chn->s32DevId = 0;
+	vi_chn->s32ChnId = pipeId;
+	venc_chn->enModId = RK_ID_VENC;
+	venc_chn->s32DevId = 0;
+	venc_chn->s32ChnId = pipeId;
+	ret = RK_MPI_SYS_Bind(vi_chn, venc_chn);
+	if (ret)
+		printf("!!!!!!!!!!!!!!!!!!Bind VI and VENC error! ret=%#x\n", ret);
+	else
+		printf("******************Bind VI and VENC success\n");
+	return 0;
+}
 
-int venc_frame(int channelId, VIDEO_FRAME_INFO_S* stVpssFrame, VENC_STREAM_S* frame)
+int unbind_vi_to_venc(int pipeId, MPP_CHN_S *vi_chn, MPP_CHN_S *venc_chn)
+{
+	int ret;
+	// unbind
+	vi_chn->enModId = RK_ID_VI;
+	vi_chn->s32DevId = 0;
+	vi_chn->s32ChnId = pipeId;
+	venc_chn->enModId = RK_ID_VENC;
+	venc_chn->s32DevId = 0;
+	venc_chn->s32ChnId = pipeId;
+	ret = RK_MPI_SYS_UnBind(vi_chn, venc_chn);
+	if (ret)
+		printf("Unbind VI and VENC error! ret=%#x\n", ret);
+	else
+		printf("Unbind VI and VENC success\n");
+	return 0;
+}
+
+
+
+// 与其他多媒体取消绑定
+int unbind_vi_to_vpss(MPP_CHN_S *stSrcChn, MPP_CHN_S *stvpssChn)
+{
+	int s32Ret;
+	printf("\n==== RK_MPI_SYS_UnBind vi0 to vpss chnID ====\n");
+	s32Ret = RK_MPI_SYS_UnBind(stSrcChn,stvpssChn);
+	if (s32Ret != RK_SUCCESS) {
+		printf("unbind ch venc failed");
+		return -1;
+	}
+	printf("\n************************RK_MPI_SYS_UnBind  success!\n");
+	return 0;
+}
+
+
+int get_venc_frame(int channelId, VIDEO_FRAME_INFO_S* stVpssFrame, VENC_STREAM_S* frame)
 {
 	// 发送视频帧到编码器
     RK_S32 s32Ret = RK_MPI_VENC_SendFrame(channelId, stVpssFrame, -1);
@@ -239,7 +317,7 @@ int venc_frame(int channelId, VIDEO_FRAME_INFO_S* stVpssFrame, VENC_STREAM_S* fr
         return -1;
     }
 
-	// 从编码器获取编码后的流
+	// 从编码器获取编码后的流 从 VENC 输出中获取帧数据
 	s32Ret = RK_MPI_VENC_GetStream(channelId, frame, -1);
     if (s32Ret != RK_SUCCESS) {
         printf("Error: Failed to get stream from encoder, error code: %d\n", s32Ret);
@@ -266,7 +344,10 @@ int rkaiq_init(void)
 	RK_BOOL multi_sensor = RK_FALSE;	
 	const char *iq_dir = "/etc/iqfiles";
 	rk_aiq_working_mode_t hdr_mode = RK_AIQ_WORKING_MODE_NORMAL;
+	// 1. 启动ISP 算法实现自动曝光控制、自动增益控制、自动白平衡、色彩校正等操作，保证捕获图像的质量
+	// SAMPLE_COMM_ISP_Init(CamId, hdr_mode, multi_sensor, iq_dir);
 	SAMPLE_COMM_ISP_Init(0, hdr_mode, multi_sensor, iq_dir);
+	// 2. 运行 ISP 算法
 	SAMPLE_COMM_ISP_Run(0);
 	printf("\n************************Init rkaiq  success!\n");
 	return 0;
@@ -283,18 +364,19 @@ int rkaiq_deinit(void)
 }
 
 
-int rkmpi_init(void)
+int rkmpi_sys_init(void)
 {
 	int ret = RK_MPI_SYS_Init();
 	if (ret) {
 		printf("rkmpi_init error!\n");
 		return -1;
 	}
+	printf("\n************************Init rkmpi sys success!\n");
 	return 0;
 }
 
 
-int rkmpi_deinit(void)
+int rkmpi_sys_deinit(void)
 {
 	int ret = RK_MPI_SYS_Exit();
 	if (ret) {
