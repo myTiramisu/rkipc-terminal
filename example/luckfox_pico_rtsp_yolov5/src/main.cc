@@ -20,10 +20,10 @@
 #include <thread>
 
 // lcd
-#include "display.h"
+
 #include "video.h"
 #include "luckfox_video.h"
-
+#include "display.h"
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -56,8 +56,33 @@ int topPadding  ;
 bool quit = false;
 static void sigterm_handler(int sig) {
 	fprintf(stderr, "signal %d\n", sig);
+	std::cout << "**************quit success sig:" << sig << std::endl;
 	quit = true;
 }
+
+int main(int argc, char *argv[]) 
+{
+  	system("RkLunch-stop.sh");
+	RK_S32 s32Ret = 0; 
+	int sX,sY,eX,eY; 
+	
+	// Ctrl-c quit
+	signal(SIGINT, sigterm_handler);
+	
+	//实例化对象	
+	Video video;
+	Display lcd;
+	
+  	while(!quit)
+	{	
+		sleep(1);
+	}
+	return 0;
+}
+
+
+
+
 
 cv::Mat letterbox(cv::Mat input)
 {
@@ -89,18 +114,7 @@ void mapCoordinates(int *x, int *y) {
     *y = (int)((float)my / scale);
 }
 
-int main(int argc, char *argv[]) 
-{
-  	system("RkLunch-stop.sh");
-	RK_S32 s32Ret = 0; 
-	int sX,sY,eX,eY; 
-	
-	// Ctrl-c quit
-	signal(SIGINT, sigterm_handler);
-	
-	//实例化对象	
-	Video video;
-	Display lcd;
+
 
 /*
 	// Rknn model
@@ -183,9 +197,8 @@ int main(int argc, char *argv[])
 	printf("\n************************RK_MPI_SYS_Bind  success!\n");
 */
 
-  	while(!quit)
-	{	
-		sleep(1);
+
+
 /*
 		// 获取VPSS帧
 		s32Ret = RK_MPI_VPSS_GetChnFrame(0,0, &stVpssFrame,-1);
@@ -264,8 +277,7 @@ int main(int argc, char *argv[])
 			RK_LOGE("RK_MPI_VENC_ReleaseStream fail %x", s32Ret);
 		}
 		memset(text,0,8);
-*/
-	}
+
 	// printf("Release\n");
 	// RK_MPI_SYS_UnBind(&stSrcChn, &stvpssChn);
 	
@@ -289,7 +301,5 @@ int main(int argc, char *argv[])
 	// // Release rknn model
     // release_yolov5_model(&rknn_app_ctx);		
 	// deinit_post_process();
+*/
 
-	
-	return 0;
-}

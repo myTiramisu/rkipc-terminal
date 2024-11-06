@@ -21,6 +21,7 @@ Video::~Video()
     {
         std::lock_guard<std::mutex> lock(mutex_video);
         quit_flag = true;
+        printf("******************************start release video\n");
     }
 
     if (video_thread0->joinable()) {
@@ -45,9 +46,9 @@ Video::~Video()
 void Video::video_thread_0()
 {
     std::cout << "************************video_thread_0 started success" << std::endl;
-
-    int video_width    = 720;
-    int video_height   = 480;
+    
+    int video_width  = 2304;
+    int video_height = 1296;
     int pipeId = 0;            // pipeId
     int viChannelId = 0;       // VI channel id
     int vencChannelId = 0;     // VENC channel id
@@ -55,10 +56,11 @@ void Video::video_thread_0()
     VENC_STREAM_S stFrame;
     stFrame.pstPack = (VENC_PACK_S *)malloc(sizeof(VENC_PACK_S));
 
-    // 初始化视频编码器 设置编码类型为 H264		
-	venc_init(pipeId, video_width, video_height, RK_VIDEO_ID_AVC);
     // 初始化视频输入通道 
     vi_chn_init(viChannelId, video_width, video_height);
+    // 初始化视频编码器 设置编码类型为 H264		
+	venc_init(pipeId, video_width, video_height, RK_VIDEO_ID_AVC);
+
 
     // 绑定输入通道到编码器
     MPP_CHN_S vi_chn;       // 视频输入通道
@@ -85,6 +87,6 @@ void Video::video_thread_0()
 // lcd display
 void Video::video_thread_1()
 {
-    std::cout << "video_thread_1 started" << std::endl;
+    std::cout << "******************************video_thread_1 started" << std::endl;
 
 }

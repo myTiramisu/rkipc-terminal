@@ -269,7 +269,7 @@ int bind_vi_to_venc(int pipeId, MPP_CHN_S *vi_chn, MPP_CHN_S *venc_chn)
 	if (ret)
 		printf("!!!!!!!!!!!!!!!!!!Bind VI and VENC error! ret=%#x\n", ret);
 	else
-		printf("******************Bind VI and VENC success\n");
+		printf("******************Bind VI and VENC 123 success \n");
 	return 0;
 }
 
@@ -285,9 +285,9 @@ int unbind_vi_to_venc(int pipeId, MPP_CHN_S *vi_chn, MPP_CHN_S *venc_chn)
 	venc_chn->s32ChnId = pipeId;
 	ret = RK_MPI_SYS_UnBind(vi_chn, venc_chn);
 	if (ret)
-		printf("Unbind VI and VENC error! ret=%#x\n", ret);
+		printf("!!!!!!!!!!!!!!!!Unbind VI and VENC error! ret=%#x\n", ret);
 	else
-		printf("Unbind VI and VENC success\n");
+		printf("****************Unbind VI and VENC success\n");
 	return 0;
 }
 
