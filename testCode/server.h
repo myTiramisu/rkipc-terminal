@@ -18,7 +18,6 @@ public:
     ~TcpServer();
 
     void start();
-    void stop();
 
 private:
     void acceptConnections();

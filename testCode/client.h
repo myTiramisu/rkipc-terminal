@@ -18,7 +18,6 @@ public:
     ~Client();
 
     bool connect_to_server();         // Connect to server
-    void disconnect();      // Disconnect from server
     // Send data to server
     void send_data(const char* message);    // 发送数据函数
 
