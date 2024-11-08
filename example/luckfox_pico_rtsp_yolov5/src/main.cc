@@ -131,8 +131,8 @@ void mapCoordinates(int *x, int *y) {
 	//h264_frame	
 	VENC_STREAM_S stFrame;	
 	stFrame.pstPack = (VENC_PACK_S *)malloc(sizeof(VENC_PACK_S));
- 	VIDEO_FRAME_INFO_S h264_frame;
- 	VIDEO_FRAME_INFO_S stVpssFrame;
+ 	VIDEO_FRAME_INFO_S h264_frame;	
+ 	VIDEO_FRAME_INFO_S stVpssFrame;	
 	printf("\n************************Init h264_frame  success!\n");
 	
 	// 视频vi输入
