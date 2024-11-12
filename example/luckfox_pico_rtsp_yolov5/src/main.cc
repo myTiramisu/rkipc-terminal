@@ -42,17 +42,6 @@
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-// disp size
-int width    = 720;
-int height   = 480;
-
-// model size
-int model_width = 640;
-int model_height = 640;	
-float scale ;
-int leftPadding ;
-int topPadding  ;
-
 bool quit = false;
 static void sigterm_handler(int sig) {
 	fprintf(stderr, "signal %d\n", sig);
@@ -69,52 +58,19 @@ int main(int argc, char *argv[])
 	// Ctrl-c quit
 	signal(SIGINT, sigterm_handler);
 	
-	//实例化对象	
+	// 实例化对象	
 	Video video;
 	Display lcd;
-	
+	// 连接 video 与 lcd
+	// sender.signal.connect(&receiver, &Receiver::receiveData);
+	video.video_frame_signal.connect(&lcd, &Display::push_frame);
+
   	while(!quit)
 	{	
 		sleep(1);
 	}
 	return 0;
 }
-
-
-
-
-
-cv::Mat letterbox(cv::Mat input)
-{
-	float scaleX = (float)model_width  / (float)width; //0.888
-	float scaleY = (float)model_height / (float)height; //1.125	
-	scale = scaleX < scaleY ? scaleX : scaleY;
-	
-	int inputWidth   = (int)((float)width * scale);
-	int inputHeight  = (int)((float)height * scale);
-
-	leftPadding = (model_width  - inputWidth) / 2;
-	topPadding  = (model_height - inputHeight) / 2;	
-	
-
-	cv::Mat inputScale;
-    cv::resize(input, inputScale, cv::Size(inputWidth,inputHeight), 0, 0, cv::INTER_LINEAR);	
-	cv::Mat letterboxImage(640, 640, CV_8UC3,cv::Scalar(0, 0, 0));
-    cv::Rect roi(leftPadding, topPadding, inputWidth, inputHeight);
-    inputScale.copyTo(letterboxImage(roi));
-
-	return letterboxImage; 	
-}
-
-void mapCoordinates(int *x, int *y) {	
-	int mx = *x - leftPadding;
-	int my = *y - topPadding;
-
-    *x = (int)((float)mx / scale);
-    *y = (int)((float)my / scale);
-}
-
-
 
 /*
 	// Rknn model
@@ -196,8 +152,6 @@ void mapCoordinates(int *x, int *y) {
 	}
 	printf("\n************************RK_MPI_SYS_Bind  success!\n");
 */
-
-
 
 /*
 		// 获取VPSS帧
@@ -297,9 +251,5 @@ void mapCoordinates(int *x, int *y) {
 	// SAMPLE_COMM_ISP_Stop(0);
 
 	// RK_MPI_SYS_Exit();
-
-	// // Release rknn model
-    // release_yolov5_model(&rknn_app_ctx);		
-	// deinit_post_process();
 */
 

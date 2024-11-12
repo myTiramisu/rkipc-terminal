@@ -7,6 +7,13 @@ extern "C" {
 #include <thread>
 #include <mutex>
 #include <iostream>
+#include "signal_slot.h"
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
+
+#include <yolov5.h>
 
 class Video
 {
@@ -21,9 +28,15 @@ private:
     // 线程函数
     void video_thread_0();      // rtsp video
     void video_thread_1();      // send frame too lcd show
+    void video_thread_2();      // yolo model
+
 public:
     Video();
     ~Video();
+    
+    // 发送摄像头数据帧信号
+    Signal<cv::Mat> video_frame_signal;
+
 };
 
 #endif

@@ -104,7 +104,7 @@ int rtsp_send_frame_h264(int channelId, VENC_STREAM_S* stFrame)
     return 0;
 }
 
-int rtsp_release_frame_h264(int channelId, VENC_STREAM_S* stFrame)
+int venc_release_frame(int channelId, VENC_STREAM_S* stFrame)
 {
     RK_S32 s32Ret = RK_MPI_VENC_ReleaseStream(0, stFrame);
     if (s32Ret != RK_SUCCESS) {

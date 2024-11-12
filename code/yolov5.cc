@@ -19,6 +19,11 @@
 
 #include "yolov5.h"
 
+float scale ;
+int leftPadding ;
+int topPadding  ;
+
+
 static void dump_tensor_attr(rknn_tensor_attr *attr)
 {
     printf("  index=%d, name=%s, n_dims=%d, dims=[%d, %d, %d, %d], n_elems=%d, size=%d, fmt=%s, type=%s, qnt_type=%s, "
@@ -198,4 +203,35 @@ int inference_yolov5_model(rknn_app_context_t *app_ctx,  object_detect_result_li
     post_process(app_ctx, app_ctx->output_mems,  box_conf_threshold, nms_threshold, od_results);
 out:
     return ret;
+}
+
+// 输出一个经过填充的图像 letterboxImage，其尺寸为 640x640
+cv::Mat letterbox(cv::Mat input, int video_width, int video_height)
+{
+    float scaleX = (float)MODEL_WIDTH / (float)video_width;
+    float scaleY = (float)MODEL_HEIGHT / (float)video_height;
+    scale = scaleX < scaleY ? scaleX : scaleY;
+
+    int inputWidth = (int)((float)video_width * scale);
+    int inputHeight = (int)((float)video_height * scale);
+
+    leftPadding = (MODEL_WIDTH - inputWidth) / 2;
+    topPadding = (MODEL_HEIGHT - inputHeight) / 2;
+
+    cv::Mat inputScale;
+    cv::resize(input, inputScale, cv::Size(inputWidth, inputHeight), 0, 0, cv::INTER_LINEAR);
+    cv::Mat letterboxImage(640, 640, CV_8UC3, cv::Scalar(0, 0, 0));
+    cv::Rect roi(leftPadding, topPadding, inputWidth, inputHeight);
+    inputScale.copyTo(letterboxImage(roi));
+
+    return letterboxImage;
+}
+
+void mapCoordinates(int *x, int *y)
+{
+    int mx = *x - leftPadding;
+    int my = *y - topPadding;
+
+    *x = (int)((float)mx / scale);
+    *y = (int)((float)my / scale);
 }

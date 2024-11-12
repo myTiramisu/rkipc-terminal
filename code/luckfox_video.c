@@ -1,5 +1,4 @@
 #include "luckfox_video.h"
-
 int vi_dev_init(void) {
 	printf("%s\n", __func__);
 	int ret = 0;
@@ -169,7 +168,7 @@ int vpss_deinit(int VpssChn) {
 	return 0;
 }
 
-int venc_init(int chnId, int width, int height, RK_CODEC_ID_E enType) {
+int venc_init(int chnId, int width, int height, RK_CODEC_ID_E enType,  PIXEL_FORMAT_E enPixelFormat) {
 	printf("%s\n",__func__);
 	// 获取 VENC 通道属性
 	VENC_RECV_PIC_PARAM_S stRecvParam;
@@ -179,7 +178,8 @@ int venc_init(int chnId, int width, int height, RK_CODEC_ID_E enType) {
 
 	// RTSP H264	
 	stAttr.stVencAttr.enType = enType;
-	stAttr.stVencAttr.enPixelFormat = RK_FMT_YUV420SP;
+	stAttr.stVencAttr.enPixelFormat = enPixelFormat;
+	//stAttr.stVencAttr.enPixelFormat = RK_FMT_YUV420SP;
 	// stAttr.stVencAttr.enPixelFormat = RK_FMT_RGB888;
 	// 设置编码类型为 H264	
 	stAttr.stVencAttr.u32Profile = H264E_PROFILE_MAIN;
@@ -222,6 +222,21 @@ int venc_deinit(int chnId) {
 	return 0;
 } 
 
+RK_U64 TEST_COMM_GetNowUs() {
+	struct timespec time = {0, 0};
+	// clock_gettime(CLOCK_MONOTONIC, &time);
+	clock_gettime(1, &time);
+	return (RK_U64)time.tv_sec * 1000000 + (RK_U64)time.tv_nsec / 1000; /* microseconds */
+}
+int venc_encode_frame(int vencChannelId, VIDEO_FRAME_INFO_S *venc_frame)
+{
+	// get vi frame
+	static RK_U32 H264_TimeRef = 0;
+	venc_frame->stVFrame.u32TimeRef = H264_TimeRef++;
+	venc_frame->stVFrame.u64PTS = TEST_COMM_GetNowUs();
+	RK_MPI_VENC_SendFrame(vencChannelId, venc_frame, -1);
+	return 0;
+}
 // 绑定视频输入通道到视频处理子系统通道
 /* 多媒体处理通道
 typedef struct rkMPP_CHN_S {
@@ -326,18 +341,6 @@ int get_venc_frame(int channelId, VIDEO_FRAME_INFO_S* stVpssFrame, VENC_STREAM_S
     return 0;
 }
 
-int venc_release_frame(VIDEO_FRAME_INFO_S *pstVideoFrame)
-{
-	RK_S32 s32Ret = RK_MPI_VPSS_ReleaseChnFrame(0, 0, pstVideoFrame);
-	if (s32Ret != RK_SUCCESS) 
-	{
-		printf("RK_MPI_VI_ReleaseChnFrame error\n");
-		return -1;
-	}
-	return 0;
-}
-
-
 
 int rkaiq_init(void)
 {
@@ -381,6 +384,50 @@ int rkmpi_sys_deinit(void)
 	int ret = RK_MPI_SYS_Exit();
 	if (ret) {
 		printf("rkmpi_deinit error!\n");
+		return -1;
+	}
+	return 0;
+}
+
+
+
+int create_MB_pool(MB_BLK *src_Blk, MB_POOL *src_Pool, int width, int height)
+{
+	// 创建内存池
+	MB_POOL_CONFIG_S PoolCfg;
+	memset(&PoolCfg, 0, sizeof(MB_POOL_CONFIG_S));
+	PoolCfg.u64MBSize = width * height * 3;
+	PoolCfg.u32MBCnt = 1;
+	PoolCfg.enAllocType = MB_ALLOC_TYPE_DMA;
+	*src_Pool = RK_MPI_MB_CreatePool(&PoolCfg);
+	*src_Blk = RK_MPI_MB_GetMB(*src_Pool, width * height * 3, RK_TRUE);
+
+	return 0;
+}
+
+int destroy_MB_pool(MB_BLK *src_Blk, MB_POOL *src_Pool)
+{
+	RK_MPI_MB_ReleaseMB(*src_Blk);
+	RK_MPI_MB_DestroyPool(*src_Pool);
+
+	return 0;
+}
+
+
+void *vi_get_frame(int pipeId, int viChannelId, int width, int height, VIDEO_FRAME_INFO_S *stViFrame)
+{
+	if (RK_MPI_VI_GetChnFrame(pipeId, viChannelId, stViFrame, -1) == RK_SUCCESS)
+	{
+		return RK_MPI_MB_Handle2VirAddr(stViFrame->stVFrame.pMbBlk);
+	}
+	return NULL;
+}
+
+int vi_release_frame(int pipeId, int viChannelId, VIDEO_FRAME_INFO_S *stViFrame)
+{
+	if (RK_SUCCESS != RK_MPI_VI_ReleaseChnFrame(pipeId, viChannelId, stViFrame))
+	{
+		printf("RK_MPI_VI_ReleaseChnFrame error\n");
 		return -1;
 	}
 	return 0;
