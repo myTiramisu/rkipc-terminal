@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
 	{	
 		sleep(1);
 	}
+	std::cout << "**************main quit" << std::endl;
 	return 0;
 }
 
