@@ -12,7 +12,7 @@ extern "C" {
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 
-
+#include "log.h"
 #include <yolov5.h>
 
 class Video
