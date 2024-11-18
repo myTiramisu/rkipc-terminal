@@ -43,21 +43,22 @@ find_package(Threads REQUIRED)
 # 源文件
 set(SRC_DIR "${EXAMPLE_DIR}/src")
 set(CODE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/code")
-# 确保包含 framebuffer.cpp
-file(GLOB SRC_FILES "${SRC_DIR}/*.cc" 
+file(GLOB SRC_FILES 
+                    "${CODE_DIR}/param/*.c"
+                    "${CODE_DIR}/osd/*.c"
                     "${CODE_DIR}/*.c"
                     "${CODE_DIR}/*.cc"
+                    "${SRC_DIR}/*.cc" 
+
 )  
 add_executable(${PROJECT_NAME} ${SRC_FILES})
-
-
 
 add_compile_options(-g -Wall
                     -DISP_HW_V30 -DRKPLATFORM=ON -DARCH64=OFF
                     -DROCKIVA -DUAPI2
                     -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 
                     )
-
+# Set linker flags to handle runtime paths for shared libraries
 set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath-link,${CMAKE_CURRENT_SOURCE_DIR}/lib:/usr/lib")
 
 target_link_libraries(${PROJECT_NAME}  
@@ -72,13 +73,13 @@ target_link_libraries(${PROJECT_NAME}
                     pthread
                     rtsp
                     )
-
+# 头文件
 target_include_directories(${PROJECT_NAME} PRIVATE                        
                             ${OpenCV_INCLUDE_DIRS}
                             ${CMAKE_CURRENT_SOURCE_DIR}/code
                             ${EXAMPLE_DIR}/include
                             ${CMAKE_CURRENT_SOURCE_DIR}
-                            ${CMAKE_CURRENT_SOURCE_DIR}/utils
+                            # ${CMAKE_CURRENT_SOURCE_DIR}/utils
                             ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/rknpu2/include
                             ${CMAKE_CURRENT_SOURCE_DIR}/common
                             ${CMAKE_CURRENT_SOURCE_DIR}/common/isp3.x   
@@ -92,7 +93,9 @@ target_include_directories(${PROJECT_NAME} PRIVATE
                             ${CMAKE_CURRENT_SOURCE_DIR}/include/rkaiq/iq_parser
                             ${CMAKE_CURRENT_SOURCE_DIR}/include/rkaiq/iq_parser_v2
                             ${CMAKE_CURRENT_SOURCE_DIR}/include/rkaiq/smartIr
-                           
+                            ${CMAKE_CURRENT_SOURCE_DIR}/include/freetype2
+                            ${CMAKE_CURRENT_SOURCE_DIR}/code/osd
+                            ${CMAKE_CURRENT_SOURCE_DIR}/code/param
                           )
                           
 

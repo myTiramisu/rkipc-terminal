@@ -33,10 +33,6 @@
 #include <linux/fb.h>
 #include <time.h>
 
-#include "image_utils.h"
-#include "file_utils.h"
-#include "image_drawing.h"
-
 //opencv
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
@@ -49,6 +45,7 @@ static void sigterm_handler(int sig) {
 	quit = true;
 }
 
+int rkipc_log_level = LOG_LEVEL_DEBUG;
 int main(int argc, char *argv[]) 
 {
   	system("RkLunch-stop.sh");

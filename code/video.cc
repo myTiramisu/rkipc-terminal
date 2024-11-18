@@ -10,8 +10,8 @@ Video::Video()
     rtsp_init();
 
     video_thread0 = new std::thread(&Video::video_thread_0, this);      // rtsp
-    // video_thread1 = new std::thread(&Video::video_thread_1, this);   // lcd
-    video_thread2 = new std::thread(&Video::video_thread_2, this);
+    video_thread1 = new std::thread(&Video::video_thread_1, this);   // lcd
+    // video_thread2 = new std::thread(&Video::video_thread_2, this);
 }
 
 Video::~Video()
@@ -20,7 +20,7 @@ Video::~Video()
         std::lock_guard<std::mutex> lock(mutex_video);
         quit_flag = true;
     }
-    printf("******************************start release video\n");
+    LOG_DEBUG("******************************start release video\n");
     if (video_thread0->joinable()) {
         video_thread0->join();
     }
@@ -36,14 +36,13 @@ Video::~Video()
     vi_dev_deinit();
     rkmpi_sys_deinit();
     rkaiq_deinit();
-    printf("******************************Release video success\n");
+    LOG_DEBUG("******************************Release video success\n");
 }
 
 // rtsp video
 void Video::video_thread_0()
 {
-    std::cout << "************************video_thread_0 started success" << std::endl;
-    
+    LOG_DEBUG("************************video_thread_0 started success\n");
     int video_width  = 2304;
     int video_height = 1296;
     int pipeId = 0;            // pipeId
@@ -73,20 +72,19 @@ void Video::video_thread_0()
         // 释放编码后的帧
         venc_release_frame(vencChannelId, &stFrame);
     }
-    std::cout << "******************************video_thread_0 exit" << std::endl;
-    sleep(1);
+    LOG_DEBUG("******************************video_thread_0 exit");
     unbind_vi_to_venc(pipeId, &vi_chn, &venc_chn);
     venc_deinit(vencChannelId);
     vi_chn_deinit(pipeId, viChannelId);
     free(stFrame.pstPack);
-    std::cout << "******************************video_thread_0 release success" << std::endl;
+    LOG_DEBUG("******************************video_thread_0 release success");
 } 
 
 
 // lcd display
 void Video::video_thread_1()
 {
-    std::cout << "******************************video_thread_1 started" << std::endl;
+    LOG_DEBUG("******************************video_thread_1 started\n");
     int pipeId = 0;                 // 管道ID
     int viChannelId = 1;            // 视频输入通道ID
     int vencChannelId = 1;          // 视频编码器通道ID
@@ -138,18 +136,19 @@ void Video::video_thread_1()
     	cv::Mat dst;
     	cv::resize(frame, dst, cv::Size(160, 128));
         // 向dipPlay类发送数据
-        // video_frame_signal.emit(dst);
+        video_frame_signal.emit(dst);
 
         // 编码
         venc_encode_frame(vencChannelId, &venc_frame);
         // 获取编码后的帧，发送到 RTSP 服务器
         rtsp_send_frame_h264(vencChannelId, &stFrame);
-        vi_release_frame(pipeId, viChannelId, &stViFrame);
+        // 释放编码后的帧
+        venc_release_frame(vencChannelId, &stFrame);    
 
-        // 释放视频帧
-        venc_release_frame(vencChannelId, &stFrame);
+        // 视频视频帧
+        vi_release_frame(pipeId, viChannelId, &stViFrame);       
     }
-    std::cout << "******************************video_thread_1 exit" << std::endl;
+    LOG_DEBUG("******************************video_thread_1 exit\n");
      sleep(1);
     venc_deinit(vencChannelId);
     vi_chn_deinit(pipeId, viChannelId);
@@ -159,7 +158,7 @@ void Video::video_thread_1()
 
 void Video::video_thread_2()
 {
-    std::cout << "************************video_thread_2 started success" << std::endl;
+    LOG_DEBUG("************************video_thread_2 started success\n");
     // video parameters
     int pipeId = 0;                  // 管道ID
     int viChannelId = 2;            // 视频输入通道ID
@@ -237,7 +236,7 @@ void Video::video_thread_2()
             {
                 object_detect_result *det_result = &(od_results.results[i]);
 
-                printf("%s @ (%d %d %d %d) %.3f\n", coco_cls_to_name(det_result->cls_id),
+                LOG_DEBUG("%s @ (%d %d %d %d) %.3f\n", coco_cls_to_name(det_result->cls_id),
                         det_result->box.left, det_result->box.top,
                         det_result->box.right, det_result->box.bottom,
                         det_result->prop);
@@ -274,7 +273,7 @@ void Video::video_thread_2()
          // 释放视频帧
         vi_release_frame(pipeId, viChannelId, &stViFrame);
     }
-    std::cout << "******************************video_thread_2 exit" << std::endl;
+    LOG_DEBUG("******************************video_thread_2 exit\n");
     sleep(1);
     venc_deinit(vencChannelId);
     vi_chn_deinit(pipeId, viChannelId);
@@ -282,5 +281,5 @@ void Video::video_thread_2()
     deinit_post_process();
     destroy_MB_pool(&src_blk, &src_Pool);
     free(stFrame.pstPack);
-    std::cout << "******************************video_thread_2 release success" << std::endl;
+    LOG_DEBUG("******************************video_thread_2 release success\n");
 }
