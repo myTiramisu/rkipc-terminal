@@ -27,6 +27,7 @@ project(${EXAMPLE_NAME})
 
 # 链接目录
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
+link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/arm-rockchip830-linux-uclibcgnueabihf)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/ 3rdparty.out)
 
 # 设置RPATH
@@ -59,7 +60,13 @@ add_compile_options(-g -Wall
                     -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64 
                     )
 # Set linker flags to handle runtime paths for shared libraries
-set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath-link,${CMAKE_CURRENT_SOURCE_DIR}/lib:/usr/lib")
+# set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath-link,${CMAKE_CURRENT_SOURCE_DIR}/lib:/usr/lib")
+
+
+# Set linker flags to handle runtime paths for shared libraries
+set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -Wl,--no-as-needed,-rpath-link,${CMAKE_CURRENT_SOURCE_DIR}/lib:/usr/lib")
+
+link_directories("${CMAKE_CURRENT_SOURCE_DIR}/lib/arm-rockchip830-linux-uclibcgnueabihf")
 
 target_link_libraries(${PROJECT_NAME}  
                     ${OpenCV_LIBS}
@@ -72,6 +79,8 @@ target_link_libraries(${PROJECT_NAME}
                     rkaiq
                     pthread
                     rtsp
+                    freetype
+                    iconv
                     )
 # 头文件
 target_include_directories(${PROJECT_NAME} PRIVATE                        
