@@ -4,6 +4,7 @@ extern "C" {
     #include "luckfox_video.h"
     #include "rtsp.h"
 }
+
 #include <thread>
 #include <mutex>
 #include <iostream>
@@ -14,6 +15,10 @@ extern "C" {
 
 #include "log.h"
 #include <yolov5.h>
+
+// osd
+#include "luckfox_osd.h"
+#include "luckfox_osd_draw.h"
 
 class Video
 {
