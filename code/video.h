@@ -19,6 +19,7 @@ extern "C" {
 // osd
 #include "luckfox_osd.h"
 #include "luckfox_osd_draw.h"
+#include "luckfox_osd_draw.h"
 
 class Video
 {

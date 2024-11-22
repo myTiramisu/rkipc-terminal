@@ -191,10 +191,9 @@ void Video::video_thread_2()
 
     // rgn draw ai result
     RGN_HANDLE coverHandle = 0;
-    // osd_drwn_rgn_init(coverHandle);
-
-
-
+    OsdDraw osdDraw;
+    std::vector<DrawTaskParams> params;
+    
     while (!quit_flag)
     {
         yuv420sp.data = (unsigned char *)vi_get_frame(pipeId, viChannelId, video_width, video_height, &stViFrame);
@@ -235,6 +234,7 @@ void Video::video_thread_2()
                                             cv::Scalar(0,255,0),2);
             }
         }
+        // osdDraw.osd_rgn_add_tasks(std::vector<DrawTaskParams>& params);
         
         // 释放视频帧
         vi_release_frame(pipeId, viChannelId, &stViFrame);

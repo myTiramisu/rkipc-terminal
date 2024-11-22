@@ -6,14 +6,25 @@ OsdDraw::OsdDraw()
     line_pixel = 2;     //0-3
     osd_rgn_draw_flag = false;
     coverHandle = 0;
-    osd_drwn_rgn_init();
-    rgn_draw_thread_id = new std::thread(&OsdDraw::rgn_draw_thread, this);
+    osd_rgn_draw__init();
+    rgn_draw_thread_id = new std::thread(&OsdDraw::osd_rgn_draw_thread, this);
     osd_rgn_draw_flag = true;
 }
 
 OsdDraw::~OsdDraw()
 {
-
+    if (!osd_rgn_draw_flag) {
+        LOG_DEBUG("osd_rgn_draw_thread not mrunni\n");
+        return;
+    }
+    osd_rgn_draw_flag = false;
+    sleep(1);
+    rgn_draw_thread_id->join();
+    while (!drawTasksQueue.empty()) {
+        drawTasksQueue.pop();
+    }
+    osd_rgn_draw__deinit();
+    LOG_DEBUG("osd_rgn_draw_thread exit");
 }
 
 
@@ -29,7 +40,7 @@ OsdDraw::~OsdDraw()
 步骤6：不用时调用 RK_MPI_RGN_DetachFromChn 将画布从绑定通道中解绑。
 步骤7：调用 RK_MPI_RGN_Destroy 销毁区域。
 */
-int OsdDraw::osd_drwn_rgn_init()   
+int OsdDraw::osd_rgn_draw__init()   
 {
     int ret = 0;
     RGN_ATTR_S stCoverAttr;         // 存储区域的属性
@@ -84,7 +95,7 @@ int OsdDraw::osd_drwn_rgn_init()
 
     return ret;
 }
-int OsdDraw::osd_drwn_rgn_deinit() 
+int OsdDraw::osd_rgn_draw__deinit() 
 {
     int ret = 0;
     RK_MPI_RGN_DetachFromChn(coverHandle, &stCoverChn);
@@ -110,16 +121,36 @@ int OsdDraw::osd_drwn_rgn_deinit()
     return ret;
 }
 
-void OsdDraw::rgn_draw_thread()
+// 添加一批需要绘制的任务的参数打包成一个任务并添加到到队列中
+int OsdDraw::osd_rgn_add_tasks(std::vector<DrawTaskParams>& params)
+{
+    if (params.size() == -1) {
+        return -1;   // 处理空任务的情况
+    }
+    // 获取任务数量
+    int num = params.size();      
+    // 创建一个新的 DrawBatchTasks 对象
+    DrawBatchTasks batchTasks(num);
+    batchTasks.params = params;
+    // 多个小任务封装成一批任务加入队列
+    drawTasksQueue.push(batchTasks);
+
+    LOG_DEBUG("add %d tasks to drawTasksQueue id", num);
+    return 0;
+}
+
+void OsdDraw::osd_rgn_draw_thread()
 {
     int ret = 0;
     // 获取区域的显示画布信息
     RGN_CANVAS_INFO_S stCanvasInfo;
 	memset(&stCanvasInfo, 0, sizeof(RGN_CANVAS_INFO_S));
 
+    LOG_DEBUG("osd_rgn_draw_thread start.........");
     // 循环绘制
     while (osd_rgn_draw_flag)
     {
+        usleep(100 * 1000);
         // 获取区域的显示画布信息
         ret = RK_MPI_RGN_GetCanvasInfo(coverHandle, &stCanvasInfo);
 		if (ret != RK_SUCCESS) {
@@ -134,20 +165,20 @@ void OsdDraw::rgn_draw_thread()
         // 将指定内存区域清零
         memset((void *)stCanvasInfo.u64VirAddr, 0, stCanvasInfo.u32VirWidth * stCanvasInfo.u32VirHeight >> 2);
 
-        int curBatchCnt = 0;
-        // 绘制同时绘制一批任务
-        while (osd_rgn_draw_flag && curBatchCnt > 0)
-        {
-            // 判断是否为同一批任务
+        // 取出队列头一批任务
+        if (drawTasksQueue.empty())
+            continue;
+        DrawBatchTasks curTask = drawTasksQueue.front();
+        drawTasksQueue.pop();
+        int taskNum = curTask.num;
 
-            // 同一批任务
-            DrawTask curTask = drawTaskQueue.front();
-            drawTaskQueue.pop();
-            // 保证参数为偶数
-            int x = curTask.x / 2 * 2;
-            int y = curTask.y / 2 * 2;
-            int w = curTask.w / 2 * 2;
-            int h = curTask.h / 2 * 2;
+        // 绘制同一批任务中的多个框
+        for (int i = 0; i < taskNum; i++)
+        {
+            int x = curTask.params[i].x / 2 * 2;
+            int y = curTask.params[i].y / 2 * 2;
+            int w = curTask.params[i].w / 2 * 2;
+            int h = curTask.params[i].h / 2 * 2;
             // 保证参数有效
             if (w <= 0 || h <= 0)   continue;
             // 保证参数在画布内
@@ -157,10 +188,8 @@ void OsdDraw::rgn_draw_thread()
             if (y + h + line_pixel > stCanvasInfo.stSize.u32Height) {
                 h -= line_pixel;
             }
-            // 绘制矩形框
-            osd_draw_rect_2BPP((RK_U8 *)stCanvasInfo.u64VirAddr, stCanvasInfo.u32VirWidth, stCanvasInfo.u32VirHeight, x, y, w, h);
-
-            curBatchCnt--;
+            // 绘制每个矩形框
+            osd_rgn_draw_rect_2BPP((RK_U8 *)stCanvasInfo.u64VirAddr, stCanvasInfo.u32VirWidth, stCanvasInfo.u32VirHeight, x, y, w, h);
         }
 
         // 一批任务绘制完成 全部同时更新
@@ -174,7 +203,7 @@ void OsdDraw::rgn_draw_thread()
 }
 
 // 绘制矩形框
-RK_S32 OsdDraw::osd_draw_rect_2BPP(RK_U8 *buffer,  RK_U32 width, RK_U32 height, int rgn_x, int rgn_y, int rgn_w, int rgn_h)
+RK_S32 OsdDraw::osd_rgn_draw_rect_2BPP(RK_U8 *buffer,  RK_U32 width, RK_U32 height, int rgn_x, int rgn_y, int rgn_w, int rgn_h)
 {
     // 检查输入参数是否有效
     if (buffer == nullptr || width == 0 || height == 0 || rgn_w <= 0 || rgn_h <= 0) {
