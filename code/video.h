@@ -19,7 +19,6 @@ extern "C" {
 // osd
 #include "luckfox_osd.h"
 #include "luckfox_osd_draw.h"
-#include "luckfox_osd_draw.h"
 
 class Video
 {
@@ -35,7 +34,7 @@ private:
     void video_thread_0();      // rtsp video
     void video_thread_1();      // send frame too lcd show
     void video_thread_2();      // yolo model
-
+ 
 public:
     Video();
     ~Video();

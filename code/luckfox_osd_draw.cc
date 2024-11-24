@@ -124,7 +124,7 @@ int OsdDraw::osd_rgn_draw__deinit()
 // 添加一批需要绘制的任务的参数打包成一个任务并添加到到队列中
 int OsdDraw::osd_rgn_add_tasks(std::vector<DrawTaskParams>& params)
 {
-    if (params.size() == -1) {
+    if (params.size() <= 0) {
         return -1;   // 处理空任务的情况
     }
     // 获取任务数量
@@ -135,7 +135,7 @@ int OsdDraw::osd_rgn_add_tasks(std::vector<DrawTaskParams>& params)
     // 多个小任务封装成一批任务加入队列
     drawTasksQueue.push(batchTasks);
 
-    LOG_DEBUG("add %d tasks to drawTasksQueue id", num);
+    // LOG_DEBUG("add %d tasks to drawTasksQueue id", num);
     return 0;
 }
 
@@ -150,7 +150,10 @@ void OsdDraw::osd_rgn_draw_thread()
     // 循环绘制
     while (osd_rgn_draw_flag)
     {
-        usleep(100 * 1000);
+        // usleep(10 * 1000);
+        if (drawTasksQueue.empty())
+            continue;
+
         // 获取区域的显示画布信息
         ret = RK_MPI_RGN_GetCanvasInfo(coverHandle, &stCanvasInfo);
 		if (ret != RK_SUCCESS) {
@@ -166,8 +169,6 @@ void OsdDraw::osd_rgn_draw_thread()
         memset((void *)stCanvasInfo.u64VirAddr, 0, stCanvasInfo.u32VirWidth * stCanvasInfo.u32VirHeight >> 2);
 
         // 取出队列头一批任务
-        if (drawTasksQueue.empty())
-            continue;
         DrawBatchTasks curTask = drawTasksQueue.front();
         drawTasksQueue.pop();
         int taskNum = curTask.num;

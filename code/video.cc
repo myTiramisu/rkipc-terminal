@@ -7,11 +7,11 @@ Video::Video()
     rkaiq_init();
     rkmpi_sys_init();    // rkmpi_sys_init
 	vi_dev_init();
-    rtsp_init();
+    rtsp_init(); 
 
     video_thread0 = new std::thread(&Video::video_thread_0, this);      // rtsp
     video_thread1 = new std::thread(&Video::video_thread_1, this);   // lcd
-    // video_thread2 = new std::thread(&Video::video_thread_2, this);
+    video_thread2 = new std::thread(&Video::video_thread_2, this);
 }
 
 Video::~Video()
@@ -168,6 +168,8 @@ void Video::video_thread_2()
     // model size
     int video_width = 640;
     int video_height = 640;
+    int rgn_video_width = 2304;
+    int rgn_video_height = 1296;
 
     // YUV420SP：主要用于视频压缩和硬件加速，数据量较小，适合传输和存储。
     // BGR：主要用于图像处理和显示，数据量较大，适合算法实现和可视化。
@@ -191,9 +193,10 @@ void Video::video_thread_2()
 
     // rgn draw ai result
     RGN_HANDLE coverHandle = 0;
-    OsdDraw osdDraw;
-    std::vector<DrawTaskParams> params;
-    
+    std::vector<DrawTaskParams> params;     // 一批任务参数
+    // osdDrawl类
+    OsdDraw osdDraw; 
+
     while (!quit_flag)
     {
         yuv420sp.data = (unsigned char *)vi_get_frame(pipeId, viChannelId, video_width, video_height, &stViFrame);
@@ -213,29 +216,42 @@ void Video::video_thread_2()
             {
                 object_detect_result *det_result = &(od_results.results[i]);
 
-                LOG_DEBUG("%s @ (%d %d %d %d) %.3f\n", coco_cls_to_name(det_result->cls_id),
-                        det_result->box.left, det_result->box.top,
-                        det_result->box.right, det_result->box.bottom,
-                        det_result->prop);
-
                 sX = (int)(det_result->box.left   );	
                 sY = (int)(det_result->box.top 	  );	
                 eX = (int)(det_result->box.right  );	
                 eY = (int)(det_result->box.bottom );
                 mapCoordinates(&sX,&sY);
                 mapCoordinates(&eX,&eY);
+                // 将检测结果的坐标从原始视频帧的尺寸映射到目标区域（RGN）的尺寸
+                sX = (int)((float)sX / (float)video_width * rgn_video_width);
+                sY = (int)((float)sY / (float)video_height * rgn_video_height);
+                eX = (int)((float)eX / (float)video_width * rgn_video_width);
+                eY = (int)((float)eY / (float)video_height * rgn_video_height);
+                // cv::rectangle(bgr,cv::Point(sX ,sY),
+                //                     cv::Point(eX ,eY),
+                //                     cv::Scalar(0,255,0),3);
+                // sprintf(text, "%s %.1f%%", coco_cls_to_name(det_result->cls_id), det_result->prop * 100);
 
-                cv::rectangle(bgr,cv::Point(sX ,sY),
-                                    cv::Point(eX ,eY),
-                                    cv::Scalar(0,255,0),3);
-                sprintf(text, "%s %.1f%%", coco_cls_to_name(det_result->cls_id), det_result->prop * 100);
-                cv::putText(bgr,text,cv::Point(sX, sY - 8),
-                                            cv::FONT_HERSHEY_SIMPLEX,1,
-                                            cv::Scalar(0,255,0),2);
+                // LOG_DEBUG("%s @ (%d %d %d %d) %.3f\n", coco_cls_to_name(det_result->cls_id),
+                //         sX, sY, eX, eY,det_result->prop);
+
+                DrawTaskParams task;              // 每个任务的参数
+                task.coverHandle = coverHandle;
+                task.x = sX;
+                task.y = sY;
+                task.w = eX - sX;
+                task.h = eY - sY;
+                params.push_back(task);
+                // cv::putText(bgr,text,cv::Point(sX, sY - 8),
+                //                             cv::FONT_HERSHEY_SIMPLEX,1,
+                //                             cv::Scalar(0,255,0),2);
             }
         }
-        // osdDraw.osd_rgn_add_tasks(std::vector<DrawTaskParams>& params);
         
+        if (params.size() > 0)
+            osdDraw.osd_rgn_add_tasks(params);
+        params.clear();             // 清空容器，一批添加结束
+
         // 释放视频帧
         vi_release_frame(pipeId, viChannelId, &stViFrame);
     }
