@@ -19,8 +19,7 @@
 
 <img src="http://www.waveshare.net/photo/development-board/Luckfox-Pico-Pro/Luckfox-Pico-Pro-M-1.jpg#pic_center" width="70%">
 
-
-### luckfox_pico_rtsp_yolov5<img src="images/luckfox_pico_rtsp_yolov5.jpg" alt="luckfox_pico_rtsp_yolov5" width="300">
+### luckfox_pico_rtsp_yolov5
 
 ## 平台支持
 
