@@ -1,6 +1,4 @@
-![1742388067342](images/README/1742388067342.png)
-
-![](http://www.waveshare.net/photo/development-board/Luckfox-Pico-Pro/Luckfox-Pico-Pro-M-1.jpg)
+<img src="images/README/1742388067342.png#pic_center" width="80%">
 
 # 瑞芯微RV1106 智能监控系统框图
 
@@ -15,6 +13,12 @@
 ## 效果图
 
 ![1742387206459](images/README/1742387206459.png)
+
+
+**硬件平台：**
+
+<img src="http://www.waveshare.net/photo/development-board/Luckfox-Pico-Pro/Luckfox-Pico-Pro-M-1.jpg#pic_center" width="70%">
+
 
 ### luckfox_pico_rtsp_yolov5<img src="images/luckfox_pico_rtsp_yolov5.jpg" alt="luckfox_pico_rtsp_yolov5" width="300">
 
