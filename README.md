@@ -1,82 +1,86 @@
-![luckfox](https://github.com/LuckfoxTECH/luckfox-pico/assets/144299491/cec5c4a5-22b9-4a9a-abb1-704b11651e88)
-# Luckfox Pico RKMPI example
-[中文](./README_CN.md)
-+ This example is based on RKMPI and Opencv-Mobile for image encoding and streaming.
-+ This example uses RKNN for image recognition inference.
-+ Example code for video capture and streaming specifically developed for Luckfox Pico series development boards.
+![1742388067342](images/README/1742388067342.png)
 
-## Implementation Results
-### luckfox_pico_rtsp_opencv   
-<img src="images/luckfox_pico_rtsp_opencv.jpg" alt="luckfox_pico_rtsp_opencv" width="300">
+![](http://www.waveshare.net/photo/development-board/Luckfox-Pico-Pro/Luckfox-Pico-Pro-M-1.jpg)
 
-### luckfox_pico_rtsp_opencv_capture
-<img src="images/luckfox_pico_rtsp_opencv_capture.jpg" alt="luckfox_pico_rtsp_opencv_capture" width="300">
+# 瑞芯微RV1106 智能监控系统框图
 
-### luckfox_pico_rtsp_retinaface   
-<img src="images/luckfox_pico_rtsp_retinaface.jpg" alt="luckfox_pico_rtsp_retinaface" width="300">
-
-### luckfox_pico_rtsp_retinaface_osd 
-<img src="images/luckfox_pico_rtsp_retinaface_osd.jpg" alt="luckfox_pico_rtsp_retinaface_osd" width="300">
-
-### luckfox_pico_rtsp_yolov5        
-<img src="images/luckfox_pico_rtsp_yolov5.jpg" alt="luckfox_pico_rtsp_yolov5" width="300">
-
-## Platform Support
- DEMO                           | CPU | system | Camera |
-------------------------------- | --- | ---- | ------- |
-luckfox_pico_rtsp_opencv        | RV1103(resolution adjustment required),rv1106 | buildroot | sc3336
-luckfox_pico_rtsp_opencv_capture| RV1103,RV1106 | buildroot | sc3336 
-luckfox_pico_rtsp_retinaface    | RV1103,RV1106 | buildroot | sc3336 
-luckfox_pico_rtsp_retinaface_osd| RV1103,RV1106 | buildroot | sc3336 
-luckfox_pico_rtsp_yolov5        | RV1106        | buildroot | sc3336 
-
-+ **RV1103**:`Luckfox Pico` `Luckfox Pico Mini A` `Luckfpx Pico Miini B` `Luckfox Pico Plus`
-+ **RV1106**:`Luckfox Pico Pro` `Luckfox Pico Max` `Luckfox Pico Ultra` `Luckfox Pico Ultra W`
-
-## Compilation
-+ Set up environment variables
-    ```
-    export LUCKFOX_SDK_PATH=<luckfox-pico SDK path>
-    ```
-    **Note**: Use absolute path.
-+ Obtain the repository source code and set the execution permissions for the automated build script
-    ```
-    chmod a+x ./build.sh
-    ./build.sh
-    ```
-+ After executing `./build.sh`, select the example to compile
-    ```
-    1) luckfox_pico_rtsp_opencv
-    2) luckfox_pico_rtsp_opencv_capture
-    3) luckfox_pico_rtsp_retinaface
-    4) luckfox_pico_rtsp_retinaface_osd
-    5) luckfox_pico_rtsp_yolov5
-    Enter your choice [1-5]:
-    ```
-
-## Running
-+ After compilation, the corresponding deployment folder will be generated in the install directory
-    ```
-    luckfox_pico_rtsp_opencv_capture_demo  
-    luckfox_pico_rtsp_retinaface_demo
-    luckfox_pico_rtsp_yolov5_demo
-    luckfox_pico_rtsp_opencv_demo          
-    luckfox_pico_rtsp_retinaface_osd_demo
-    ```
-+ Upload the generated deployment folder to the Luckfox Pico (using adb, ssh, etc.). On the board, enter the folder and run the demo
-    ```
-    # On the Luckfox Pico board, <Demo Target> is the executable program within the deployment folder
-    chmod a+x <Demo Target>
-    ./<Demo Target>
-    ```
-    **Note:** Do not alter the structure of the deployment folder.
-+ Use VLC to open the network stream `rtsp://172.32.0.93/live/0` (adjust the IP address as needed to retrieve the image)
+- **Thread1：** RKMPI视频采集、编码 + RTSP推流
+- Thread2：RKMPI视频采集、编码 + LCD同步显示
+- Thread3：yoloV5识别、推流，osd标注
+- QT：多路视频解码显示，部署全志H6161硬件平台
 
 
-## Note
-+ Before running the demo, execute `RkLunch-stop.sh` to disable the default background app `rkicp` running on luckfox-pico, which occupies the camera.
-+ Due to the limited system resources of the RV1103, please reduce the video capture resolution if it does not run properly.
+![1742388126108](images/README/1742388126108.png)
+
+## 效果图
+
+![1742387206459](images/README/1742387206459.png)
+
+### luckfox_pico_rtsp_yolov5<img src="images/luckfox_pico_rtsp_yolov5.jpg" alt="luckfox_pico_rtsp_yolov5" width="300">
+
+## 平台支持
 
 
-## Detail
-[RKMPI Instance User Guide](https://wiki.luckfox.com/Luckfox-Pico/Luckfox-Pico-RV1106/Luckfox-Pico-Ultra-W/Luckfox-Pico-GPIO/RKMPI-example)
+| DEMO                             | CPU                          | 系统      | 摄像头 |
+| -------------------------------- | ---------------------------- | --------- | ------ |
+| luckfox_pico_rtsp_opencv         | RV1103(需修改分辨率)、RV1106 | buildroot | sc3336 |
+| luckfox_pico_rtsp_opencv_capture | RV1103、RV1106               | buildroot | sc3336 |
+| luckfox_pico_rtsp_retinaface     | RV1103、RV1106               | buildroot | sc3336 |
+| luckfox_pico_rtsp_retinaface_osd | RV1103、RV1106               | buildroot | sc3336 |
+| luckfox_pico_rtsp_yolov5         | RV1106                       | buildroot | sc3336 |
+
++ **RV1103**：`Luckfox Pico` `Luckfox Pico Mini A` `Luckfpx Pico Miini B` `Luckfox Pico Plus`
++ **RV1106**：`Luckfox Pico Pro` `Luckfox Pico Max` `Luckfox Pico Ultra` `Luckfox Pico Ultra W`
+
+## 编译
+
++ 设置环境变量
+
+  ```
+  export LUCKFOX_SDK_PATH=< luckfox-pico Sdk 地址>
+  ```
+
+  **注意**：使用绝对地址。
++ 获取仓库源码并设置自动编译脚本执行权限
+
+  ```
+  chmod a+x ./build.sh
+  ./build.sh
+  ```
++ 执行 `./build.sh` 后选择编译的例程
+
+  ```
+  1) luckfox_pico_rtsp_opencv
+  2) luckfox_pico_rtsp_opencv_capture
+  3) luckfox_pico_rtsp_retinaface
+  4) luckfox_pico_rtsp_retinaface_osd
+  5) luckfox_pico_rtsp_yolov5
+  Enter your choice [1-5]:
+  ```
+
+## 运行
+
++ 编译完成后会在 install 文件夹下生成对应的部署文件夹
+  ```
+  luckfox_pico_rtsp_opencv_demo  
+  luckfox_pico_rtsp_opencv_capture_demo  
+  luckfox_pico_rtsp_retinaface_demo
+  luckfox_pico_rtsp_retinaface_osd_demo
+  luckfox_pico_rtsp_yolov5_demo 
+  ```
++ 将生成的部署文件夹完整上传到 Luckfox Pico 上 (可使用adb ssh等方式) ，板端进入文件夹运行
+  ```
+  # 在 Luckfox Pico 板端运行，<Demo Target> 是部署文件夹中的可执行程序
+  chmod a+x <Demo Target>
+  ./<Demo Target>
+  ```
++ 使用 VLC 打开网络串流 `rtsp://172.32.0.93/live/0`（按实际情况修改 IP 地址拉取图像）
+
+## 注意
+
++ 在运行demo前请执行 `RkLunch-stop.sh` 关闭 Luckofox Pico 开机默认开启的后台程序 `rkicp` ,解除对摄像头的占用。
++ RV1103 的系统资源较少，无法正常运行时请降低视频捕获的分辨率。
+
+## 详细
+
+[RKMPI实例使用指南](https://wiki.luckfox.com/zh/Luckfox-Pico/Luckfox-Pico-RV1106/Luckfox-Pico-Ultra-W/RKMPI-example)
