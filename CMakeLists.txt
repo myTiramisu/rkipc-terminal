@@ -34,14 +34,15 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 # 源文件
-set(SRC_DIR "src")
 set(CODE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/code")
 file(GLOB SRC_FILES 
                     "${CODE_DIR}/param/*.c"
                     "${CODE_DIR}/osd/*.c"
-                    "${CODE_DIR}/*.c"
-                    "${CODE_DIR}/*.cc"
-                    "${SRC_DIR}/*.cc" 
+                    "${CODE_DIR}/net/*.cc"
+                    "${CODE_DIR}/display/*.c"
+                    "${CODE_DIR}/display/*.cc"
+                    "${CODE_DIR}/video/*.cc"
+                    "${CODE_DIR}/video/*.c"
                     "*.cc" 
 
 )  
@@ -96,6 +97,12 @@ target_include_directories(${PROJECT_NAME} PRIVATE
                             ${CMAKE_CURRENT_SOURCE_DIR}/include/freetype2
                             ${CMAKE_CURRENT_SOURCE_DIR}/code/osd
                             ${CMAKE_CURRENT_SOURCE_DIR}/code/param
+                            ${CMAKE_CURRENT_SOURCE_DIR}/code/display
+                            ${CMAKE_CURRENT_SOURCE_DIR}/code/log
+                            ${CMAKE_CURRENT_SOURCE_DIR}/code/net
+                            ${CMAKE_CURRENT_SOURCE_DIR}/code/param
+                            ${CMAKE_CURRENT_SOURCE_DIR}/code/param
+                            ${CMAKE_CURRENT_SOURCE_DIR}/code/video
                           )
                           
 
