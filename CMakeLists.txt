@@ -7,14 +7,6 @@ set(SDK_PATH "/home/yuanjl/luckfox-pico")
 set(CMAKE_C_COMPILER "${SDK_PATH}/tools/linux/toolchain/arm-rockchip830-linux-uclibcgnueabihf/bin/arm-rockchip830-linux-uclibcgnueabihf-gcc")
 set(CMAKE_CXX_COMPILER "${SDK_PATH}/tools/linux/toolchain/arm-rockchip830-linux-uclibcgnueabihf/bin/arm-rockchip830-linux-uclibcgnueabihf-g++")
 
-#Processing Parameters 处理参数
-if(DEFINED EXAMPLE_DIR)
-    message(STATUS "Selected source directory: ${EXAMPLE_DIR}")
-else()
-    message(FATAL_ERROR "No source directory selected!")
-    return()
-endif()
-
 if(DEFINED EXAMPLE_NAME)
     message(STATUS "Set project name: ${EXAMPLE_NAME}")
 else()
@@ -23,7 +15,7 @@ else()
 endif()
 
 # 创建项目
-project(${EXAMPLE_NAME})
+project("rkipc_terminal")
 
 # 链接目录
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
@@ -42,7 +34,7 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 # 源文件
-set(SRC_DIR "${EXAMPLE_DIR}/src")
+set(SRC_DIR "src")
 set(CODE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/code")
 file(GLOB SRC_FILES 
                     "${CODE_DIR}/param/*.c"
@@ -50,6 +42,7 @@ file(GLOB SRC_FILES
                     "${CODE_DIR}/*.c"
                     "${CODE_DIR}/*.cc"
                     "${SRC_DIR}/*.cc" 
+                    "*.cc" 
 
 )  
 add_executable(${PROJECT_NAME} ${SRC_FILES})
@@ -86,9 +79,7 @@ target_link_libraries(${PROJECT_NAME}
 target_include_directories(${PROJECT_NAME} PRIVATE                        
                             ${OpenCV_INCLUDE_DIRS}
                             ${CMAKE_CURRENT_SOURCE_DIR}/code
-                            ${EXAMPLE_DIR}/include
                             ${CMAKE_CURRENT_SOURCE_DIR}
-                            # ${CMAKE_CURRENT_SOURCE_DIR}/utils
                             ${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/rknpu2/include
                             ${CMAKE_CURRENT_SOURCE_DIR}/common
                             ${CMAKE_CURRENT_SOURCE_DIR}/common/isp3.x   
@@ -108,10 +99,10 @@ target_include_directories(${PROJECT_NAME} PRIVATE
                           )
                           
 
-message(STATUS "model dir PATH: ${EXAMPLE_DIR}/model")
+message(STATUS "model dir PATH:model")
 
 set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/install/${PROJECT_NAME}_demo")
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_PREFIX})
-SET(MODEL_DIR "${EXAMPLE_DIR}/model")
+SET(MODEL_DIR "model")
 file(GLOB MODEL_FILES "${MODEL_DIR}/*")  
 install(FILES ${MODEL_FILES} DESTINATION ${CMAKE_INSTALL_PREFIX}/model)                    
