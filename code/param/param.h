@@ -3,6 +3,10 @@
 // found in the LICENSE file.
 #include "iniparser.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 extern dictionary *g_ini_d_;
 
 int rk_param_get_int(const char *entry, int default_val);
@@ -13,3 +17,7 @@ int rk_param_save();
 int rk_param_init(char *ini_path);
 int rk_param_deinit();
 int rk_param_reload();
+
+#ifdef __cplusplus
+}
+#endif

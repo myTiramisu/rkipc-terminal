@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 #include "common.h"
-// time.h
-#define CLOCK_REALTIME			0
 
 typedef struct rk_signal_t {
 	sem_t sem;

@@ -697,6 +697,8 @@ static line_status iniparser_line(const char *input_line, char *section, char *k
   The returned dictionary must be freed using iniparser_freedict().
  */
 /*--------------------------------------------------------------------------*/
+// 函数功能：读取一个ini文件，并将其解析为字典对象
+// 若不存在, 返回NULL
 dictionary *iniparser_load(const char *ininame) {
 	FILE *in;
 

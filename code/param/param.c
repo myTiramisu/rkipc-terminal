@@ -4,6 +4,7 @@
 #include "common.h"
 #include "iniparser.h"
 #include "log.h"
+#include "param.h"
 
 #ifdef LOG_TAG
 #undef LOG_TAG
@@ -14,6 +15,7 @@ char g_ini_path_[256];
 dictionary *g_ini_d_;
 static pthread_mutex_t g_param_mutex = PTHREAD_MUTEX_INITIALIZER;
 
+// 打印ini文件
 int rk_param_dump() {
 	const char *section_name;
 	const char *keys[32];
@@ -23,12 +25,14 @@ int rk_param_dump() {
 
 	for (int i = 0; i < section_num; i++) {
 		section_name = iniparser_getsecname(g_ini_d_, i);
-		LOG_DEBUG("section_name is %s\n", section_name);
+		// LOG_DEBUG("section_name is %s\n", section_name);
 		section_keys = iniparser_getsecnkeys(g_ini_d_, section_name);
+		// LOG_DEBUG("section_keys is %d\n", section_keys);
 		for (int j = 0; j < section_keys; j++) {
 			iniparser_getseckeys(g_ini_d_, section_name, keys);
 			LOG_DEBUG("%s = %s\n", keys[j], iniparser_getstring(g_ini_d_, keys[j], ""));
 		}
+		// LOG_DEBUG("section: %d load success\n", i);
 	}
 
 	return 0;

@@ -39,12 +39,13 @@ file(GLOB SRC_FILES
                     "${CODE_DIR}/param/*.c"
                     "${CODE_DIR}/osd/*.c"
                     "${CODE_DIR}/net/*.cc"
-                    "${CODE_DIR}/display/*.c"
                     "${CODE_DIR}/display/*.cc"
+                    "${CODE_DIR}/display/*.c"
                     "${CODE_DIR}/video/*.cc"
                     "${CODE_DIR}/video/*.c"
+                    "${CODE_DIR}/led/*.cpp"
+                    "${CODE_DIR}/led/*.c"
                     "*.cc" 
-
 )  
 add_executable(${PROJECT_NAME} ${SRC_FILES})
 
@@ -100,9 +101,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
                             ${CMAKE_CURRENT_SOURCE_DIR}/code/display
                             ${CMAKE_CURRENT_SOURCE_DIR}/code/log
                             ${CMAKE_CURRENT_SOURCE_DIR}/code/net
-                            ${CMAKE_CURRENT_SOURCE_DIR}/code/param
-                            ${CMAKE_CURRENT_SOURCE_DIR}/code/param
                             ${CMAKE_CURRENT_SOURCE_DIR}/code/video
+                            ${CMAKE_CURRENT_SOURCE_DIR}/code/led
                           )
                           
 
