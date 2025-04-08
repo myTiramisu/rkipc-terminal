@@ -7,12 +7,12 @@ set(SDK_PATH "/home/yuanjl/luckfox-pico")
 set(CMAKE_C_COMPILER "${SDK_PATH}/tools/linux/toolchain/arm-rockchip830-linux-uclibcgnueabihf/bin/arm-rockchip830-linux-uclibcgnueabihf-gcc")
 set(CMAKE_CXX_COMPILER "${SDK_PATH}/tools/linux/toolchain/arm-rockchip830-linux-uclibcgnueabihf/bin/arm-rockchip830-linux-uclibcgnueabihf-g++")
 
-if(DEFINED EXAMPLE_NAME)
-    message(STATUS "Set project name: ${EXAMPLE_NAME}")
-else()
-    message(FATAL_ERROR "Project name not specified!")
-    return()
-endif()
+# if(DEFINED EXAMPLE_NAME)
+#     message(STATUS "Set project name: ${EXAMPLE_NAME}")
+# else()
+#     message(FATAL_ERROR "Project name not specified!")
+#     return()
+# endif()
 
 # 创建项目
 project("rkipc_terminal")
@@ -45,6 +45,9 @@ file(GLOB SRC_FILES
                     "${CODE_DIR}/video/*.c"
                     "${CODE_DIR}/led/*.cpp"
                     "${CODE_DIR}/led/*.c"
+                    "${CODE_DIR}/ptz/*.cpp"
+                    "${CODE_DIR}/ptz/*.c"
+                    "${CODE_DIR}/control/*.cpp"
                     "*.cc" 
 )  
 add_executable(${PROJECT_NAME} ${SRC_FILES})
@@ -103,6 +106,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
                             ${CMAKE_CURRENT_SOURCE_DIR}/code/net
                             ${CMAKE_CURRENT_SOURCE_DIR}/code/video
                             ${CMAKE_CURRENT_SOURCE_DIR}/code/led
+                            ${CMAKE_CURRENT_SOURCE_DIR}/code/ptz
+                            ${CMAKE_CURRENT_SOURCE_DIR}/code/control
                           )
                           
 

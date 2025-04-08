@@ -1,8 +1,9 @@
 #include "video.h"		// video
 #include "display.h"	// lcd
 #include "led.h"		// led
-#include "log.h"
-#include "param.h"
+#include "pantilt.h"	// pantilt
+#include "log.h"		// log
+#include "param.h"		// param
 
 char ini_path[] = "rkipc.ini";
 int rkipc_log_level = LOG_LEVEL_DEBUG;
@@ -31,12 +32,16 @@ int main(int argc, char *argv[])
 	Video video;
 	Display lcd;
 
+	// 俯仰旋转控制
+	Pantilt pantilt;
+
+	// LED模块
 	Led *led0 = new Led(LED0);
 	Led *led1 = new Led(LED1);
 	Led *led2 = new Led(LED2);	
-	led0->on();
-	led1->on();
-	led2->on();
+	led0->off();
+	led1->off();
+	led2->off();
 
 	// 连接 video 与 lcd
 	// sender.signal.connect(&receiver, &Receiver::receiveData);
@@ -46,7 +51,6 @@ int main(int argc, char *argv[])
 	{	
 		sleep(1);
 	}
-
 
 	rk_param_deinit();
     LOG_INFO("Program exited\n");

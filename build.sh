@@ -24,7 +24,7 @@ if [ -d ${ROOT_PWD}/build ]; then
 fi
 mkdir ${ROOT_PWD}/build
 cd ${ROOT_PWD}/build
-cmake .. -DEXAMPLE_NAME="rkipc_termianal"
+cmake ..
 make install
 
 

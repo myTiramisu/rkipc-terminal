@@ -8,7 +8,6 @@
  * @param led_num LED 编号。
  */
 
-
 Led::Led(enum Led_num led_num) : led_num_(led_num), on_time_(0), off_time_(0), blink_frequency_(1), mode_("manual") 
 {
     // 初始化 GPIO
@@ -32,7 +31,6 @@ Led::Led(enum Led_num led_num) : led_num_(led_num), on_time_(0), off_time_(0), b
         blink_frequency_ = 1;  // 设置为默认值
     }
 }
-
 /**
  * @brief LED 类析构函数。
  */
