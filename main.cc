@@ -4,7 +4,18 @@
 #include "pantilt.h"	// pantilt
 #include "log.h"		// log
 #include "param.h"		// param
+#include <unistd.h>
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
+    extern int create_onvif_server();
+
+#ifdef __cplusplus
+}
+#endif
+extern int create_onvif_server();
 char ini_path[] = "rkipc.ini";
 int rkipc_log_level = LOG_LEVEL_DEBUG;
 
@@ -47,6 +58,7 @@ int main(int argc, char *argv[])
 	// sender.signal.connect(&receiver, &Receiver::receiveData);
 	video.video_frame_signal.connect(&lcd, &Display::push_frame);
 
+	create_onvif_server();
   	while(!quit)
 	{	
 		sleep(1);
