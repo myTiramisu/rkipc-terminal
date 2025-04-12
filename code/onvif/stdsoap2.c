@@ -8011,11 +8011,9 @@ soap_done(struct soap *soap)
     if (soap->ctx)
       gsk_environment_close(&soap->ctx);
 #endif
-
-// #ifdef WITH_C_LOCALE
-//   SOAP_FREELOCALE(soap);
-// #endif
-
+#ifdef WITH_C_LOCALE
+  SOAP_FREELOCALE(soap);
+#endif
 #ifdef WITH_ZLIB
   if (soap->d_stream)
   {
@@ -17194,7 +17192,7 @@ soap_inshort(struct soap *soap, const char *tag, short *p, const char *type, int
 }
 
 /******************************************************************************/
-/*
+
 SOAP_FMAC1
 const char*
 SOAP_FMAC2
@@ -17223,13 +17221,12 @@ soap_float2s(struct soap *soap, float n)
 # endif
 #else
   (SOAP_SNPRINTF(soap->tmpbuf, sizeof(soap->tmpbuf), 80), soap->float_format, n);
-  s = strchr(soap->tmpbuf, ',');        // convert decimal comma to DP 
+  s = strchr(soap->tmpbuf, ',');        /* convert decimal comma to DP */
   if (s)
     *s = '.';
 #endif
   return soap->tmpbuf;
 }
-*/
 
 /******************************************************************************/
 
@@ -17245,7 +17242,7 @@ soap_outfloat(struct soap *soap, const char *tag, int id, const float *p, const 
 }
 
 /******************************************************************************/
-/*
+
 SOAP_FMAC1
 int
 SOAP_FMAC2
@@ -17273,7 +17270,7 @@ soap_s2float(struct soap *soap, const char *s, float *p)
     }
     else
     {
-//On some systems strtof requires -std=c99 or does not even link: so we try strtod first
+/* On some systems strtof requires -std=c99 or does not even link: so we try strtod first */
 #if defined(WITH_C_LOCALE)
 # if defined(HAVE_STRTOD_L)
       char *r;
@@ -17340,7 +17337,6 @@ soap_s2float(struct soap *soap, const char *s, float *p)
   }
   return soap->error;
 }
-*/
 
 /******************************************************************************/
 
@@ -17407,7 +17403,7 @@ soap_infloat(struct soap *soap, const char *tag, float *p, const char *type, int
 }
 
 /******************************************************************************/
-/*
+
 SOAP_FMAC1
 const char*
 SOAP_FMAC2
@@ -17436,13 +17432,12 @@ soap_double2s(struct soap *soap, double n)
 # endif
 #else
   (SOAP_SNPRINTF(soap->tmpbuf, sizeof(soap->tmpbuf), 80), soap->double_format, n);
-  s = strchr(soap->tmpbuf, ',');        // convert decimal comma to DP 
+  s = strchr(soap->tmpbuf, ',');        /* convert decimal comma to DP */
   if (s)
     *s = '.';
 #endif
   return soap->tmpbuf;
 }
-*/
 
 /******************************************************************************/
 
@@ -17458,7 +17453,7 @@ soap_outdouble(struct soap *soap, const char *tag, int id, const double *p, cons
 }
 
 /******************************************************************************/
-/*
+
 SOAP_FMAC1
 int
 SOAP_FMAC2
@@ -17526,7 +17521,6 @@ soap_s2double(struct soap *soap, const char *s, double *p)
   }
   return soap->error;
 }
-*/
 
 /******************************************************************************/
 

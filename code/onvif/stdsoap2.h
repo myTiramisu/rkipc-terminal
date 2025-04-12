@@ -674,7 +674,6 @@ extern intmax_t __strtoull(const char*, char**, int);
 # endif
 #endif
 
-
 /* force inclusion of xlocale.h when WITH_INCLUDE_XLOCALE_H is defined by the user for systems that require xlocale.h */
 #ifdef WITH_INCLUDE_XLOCALE_H
 # ifndef HAVE_XLOCALE_H
@@ -682,37 +681,29 @@ extern intmax_t __strtoull(const char*, char**, int);
 # endif
 #endif
 
-
-
-
-// #ifdef WITH_C_LOCALE
-// # include <locale.h>
-// # if defined(WIN32) && !defined(CYGWIN)
-// #  define SOAP_LOCALE_T _locale_t
-// #  define SOAP_LOCALE(soap) ((soap)->c_locale ? (soap)->c_locale : ((soap)->c_locale = _create_locale(LC_ALL, "C")))
-// #  define SOAP_FREELOCALE(soap) (void)((soap)->c_locale && (_free_locale((soap)->c_locale), ((soap)->c_locale = NULL)))
-// # else
-// #  if defined(HAVE_XLOCALE_H)
-// #   include <xlocale.h>
-// #  endif
-// #  define SOAP_LOCALE_T locale_t
-// #  define SOAP_LOCALE(soap) ((soap)->c_locale ? (soap)->c_locale : ((soap)->c_locale = newlocale(LC_ALL_MASK, "C", NULL)))
-// #  define SOAP_FREELOCALE(soap) (void)((soap)->c_locale && (freelocale((soap)->c_locale), ((soap)->c_locale = NULL)))
-// #  if defined(CYGWIN)
-// #   undef HAVE_STRTOF_L /* Cygwin does not support strtof_l strtod_l */
-// #   undef HAVE_STRTOD_L
-// #  endif
-// # endif
-// #else
-// # undef HAVE_STRTOF_L
-// # undef HAVE_STRTOD_L
-// # undef HAVE_SSCANF_L
-// #endif
-
-
-
-
-
+#ifdef WITH_C_LOCALE
+# include <locale.h>
+# if defined(WIN32) && !defined(CYGWIN)
+#  define SOAP_LOCALE_T _locale_t
+#  define SOAP_LOCALE(soap) ((soap)->c_locale ? (soap)->c_locale : ((soap)->c_locale = _create_locale(LC_ALL, "C")))
+#  define SOAP_FREELOCALE(soap) (void)((soap)->c_locale && (_free_locale((soap)->c_locale), ((soap)->c_locale = NULL)))
+# else
+#  if defined(HAVE_XLOCALE_H)
+#   include <xlocale.h>
+#  endif
+#  define SOAP_LOCALE_T locale_t
+#  define SOAP_LOCALE(soap) ((soap)->c_locale ? (soap)->c_locale : ((soap)->c_locale = newlocale(LC_ALL_MASK, "C", NULL)))
+#  define SOAP_FREELOCALE(soap) (void)((soap)->c_locale && (freelocale((soap)->c_locale), ((soap)->c_locale = NULL)))
+#  if defined(CYGWIN)
+#   undef HAVE_STRTOF_L /* Cygwin does not support strtof_l strtod_l */
+#   undef HAVE_STRTOD_L
+#  endif
+# endif
+#else
+# undef HAVE_STRTOF_L
+# undef HAVE_STRTOD_L
+# undef HAVE_SSCANF_L
+#endif
 
 #ifdef TANDEM_NONSTOP /* Support for Guardian */
 # define SOAP_BUFLEN (32767)
@@ -3008,15 +2999,11 @@ struct SOAP_CMAC soap
   } peer; /* set by soap_connect/soap_accept and by UDP recv */
   size_t peerlen;
 #endif
-
-
 #ifdef SOAP_LOCALE_T
   SOAP_LOCALE_T c_locale;       /* if this does not compile, use ./configure --enable-xlocale or compile with -DWITH_INCLUDE_XLOCALE_H, or use -DWITH_NO_C_LOCALE to disable locale support */
 #else
   void *c_locale;
 #endif
-
-
 #ifdef WITH_ZLIB
   z_stream *d_stream;           /* decompression stream */
   uLong z_crc;                  /* internal gzip crc */
