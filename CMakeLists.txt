@@ -7,12 +7,6 @@ set(SDK_PATH "/home/yuanjl/luckfox-pico")
 set(CMAKE_C_COMPILER "${SDK_PATH}/tools/linux/toolchain/arm-rockchip830-linux-uclibcgnueabihf/bin/arm-rockchip830-linux-uclibcgnueabihf-gcc")
 set(CMAKE_CXX_COMPILER "${SDK_PATH}/tools/linux/toolchain/arm-rockchip830-linux-uclibcgnueabihf/bin/arm-rockchip830-linux-uclibcgnueabihf-g++")
 
-# if(DEFINED EXAMPLE_NAME)
-#     message(STATUS "Set project name: ${EXAMPLE_NAME}")
-# else()
-#     message(FATAL_ERROR "Project name not specified!")
-#     return()
-# endif()
 
 # 创建项目
 project("rkipc_terminal")
@@ -20,12 +14,11 @@ project("rkipc_terminal")
 # 链接目录
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib)
 link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/arm-rockchip830-linux-uclibcgnueabihf)
-# link_directories(${CMAKE_CURRENT_SOURCE_DIR}/lib/onvif/lib)
 add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/ 3rdparty.out)
 
 # 设置RPATH
 set(CMAKE_INSTALL_RPATH "$ORIGIN/lib")
-add_definitions(-DRV1106_1103)
+add_definitions(-DRV1106_1103 -DWITH_NO_C_LOCALE)
 
 #Opencv 4 查找OpenCV
 set(OpenCV_DIR "${CMAKE_CURRENT_SOURCE_DIR}/lib/cmake/opencv4")
@@ -50,7 +43,8 @@ file(GLOB SRC_FILES
                     "${CODE_DIR}/ptz/*.cpp"
                     "${CODE_DIR}/ptz/*.c"
                     "${CODE_DIR}/control/*.cpp"
-                    "${CODE_DIR}/onvif/*.c"
+                    "${CODE_DIR}/onvif/soap/*.c"
+                    "${CODE_DIR}/onvif/server/*.c"
                     "*.cc" 
 )  
 
@@ -60,9 +54,8 @@ add_compile_options(-g -Wall
                     -DISP_HW_V30 -DRKPLATFORM=ON -DARCH64=OFF
                     -DROCKIVA -DUAPI2
                     -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_FILE_OFFSET_BITS=64
+                    -WITH_NO_C_LOCALE
                     )
-# Set linker flags to handle runtime paths for shared libraries
-# set(CMAKE_EXE_LINKER_FLAGS  "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath-link,${CMAKE_CURRENT_SOURCE_DIR}/lib:/usr/lib")
 
 
 # Set linker flags to handle runtime paths for shared libraries
@@ -83,7 +76,6 @@ target_link_libraries(${PROJECT_NAME}
                     rtsp
                     freetype
                     iconv
-                    gsoap
                     )
 # 头文件
 target_include_directories(${PROJECT_NAME} PRIVATE                        
@@ -113,8 +105,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
                             ${CMAKE_CURRENT_SOURCE_DIR}/code/led
                             ${CMAKE_CURRENT_SOURCE_DIR}/code/ptz
                             ${CMAKE_CURRENT_SOURCE_DIR}/code/control
-                            ${CMAKE_CURRENT_SOURCE_DIR}/code/onvif
-                            ${CMAKE_CURRENT_SOURCE_DIR}/lib/onvif/include
+                            ${CMAKE_CURRENT_SOURCE_DIR}/code/onvif/soap
+                            ${CMAKE_CURRENT_SOURCE_DIR}/code/onvif/server
                           )
 
 message(STATUS "model dir PATH:model")

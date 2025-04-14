@@ -1,8 +1,8 @@
 #ifndef _MACRO_H_
 #define _MACRO_H_
 
-#define DEVICE_IP "192.168.10.129"                          // 设备 IP
-#define DEVICE_PORT 8080                                    // 设备服务端口
+#define DEVICE_IP "192.168.10.137"                              // 设备 IP
+#define DEVICE_PORT 8080                                        // 设备服务端口
 // #define USERNAME "admin"                                    // 登录用户名
 // #define PASSWORD "admin123"                                 // 登录密码
 // #define VIDEO_WIDTH 1920                                    // 视频宽度

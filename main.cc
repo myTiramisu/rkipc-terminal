@@ -5,17 +5,8 @@
 #include "log.h"		// log
 #include "param.h"		// param
 #include <unistd.h>
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+#include "onvif_server.h"
 
-    extern int create_onvif_server();
-
-#ifdef __cplusplus
-}
-#endif
-extern int create_onvif_server();
 char ini_path[] = "rkipc.ini";
 int rkipc_log_level = LOG_LEVEL_DEBUG;
 
@@ -39,14 +30,19 @@ int main(int argc, char *argv[])
 	// Ctrl-c quit
 	signal(SIGINT, sigterm_handler);
 	
-	// 实例化对象	
+	// 实例化对象
+	LOG_INFO("video Module init\n");	
 	Video video;
+
+	LOG_INFO("lcd Module init\n");
 	Display lcd;
 
 	// 俯仰旋转控制
+	LOG_INFO("ptz Module init\n");
 	Pantilt pantilt;
 
 	// LED模块
+	LOG_INFO("led Module init\n");
 	Led *led0 = new Led(LED0);
 	Led *led1 = new Led(LED1);
 	Led *led2 = new Led(LED2);	
@@ -58,7 +54,9 @@ int main(int argc, char *argv[])
 	// sender.signal.connect(&receiver, &Receiver::receiveData);
 	video.video_frame_signal.connect(&lcd, &Display::push_frame);
 
-	create_onvif_server();
+	LOG_INFO("onvif Module init\n");
+	onvif_server_init();
+
   	while(!quit)
 	{	
 		sleep(1);

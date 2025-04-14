@@ -3,6 +3,8 @@
 #include "soapStub.h"
 #include "soapH.h"
 #include "macro.h"
+#include <stdio.h>
+#include "onvif_server.h"
 
 void *onvif_discovered_server(void *arg)
 {
@@ -152,8 +154,9 @@ end:
     return NULL;
 }
 
-int create_onvif_server()
+int onvif_server_init()
 {
+    printf("create_onvif_server success\n");
     pthread_t thread1, thread2;
     pthread_attr_t attr1, attr2;
 
