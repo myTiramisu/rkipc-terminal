@@ -10,59 +10,59 @@
 #include "log.h"
 #include "param.h"
 
-
+// 控制信号结构体
 struct ControlSignal {
-    int module_id;
-    int opcode;
-    int param;
+    int module_id;      // 模块ID
+    int opcode;         // 操作码
+    int param;          // 参数
 };
 
 enum ModuleID {
     ID_UNKNOWN = 0,
-    ID_LED,
-    ID_PANTILT,
-    ID_DISPLAY,
-    ID_VIDEO
+    ID_LED,             // LED模块
+    ID_PANTILT,         // 摄像头控制模块
+    ID_DISPLAY,         // 显示模块
+    ID_VIDEO            // 视频模块
 };
 
 enum LEDOpcode {
-    OP_LED_ON = 0,
-    OP_LED_OFF,
-    OP_LED_TOGGLE,
-    OP_LED_BLINK,
-    OP_LED_MAX
+    OP_LED_ON = 0,      // 打开LED
+    OP_LED_OFF,         // 关闭LED
+    OP_LED_TOGGLE,      // 切换LED状态
+    OP_LED_BLINK,       // LED闪烁
+    OP_LED_MAX          // LED操作码最大值
 };
 
 enum LEDParam {
-    PA_LED0 = 0,
-    PA_LED1,
-    PA_LED2,
-    PA_LED_MAX
+    PA_LED0 = 0,        // LED0
+    PA_LED1,            // LED1
+    PA_LED2,            // LED2
+    PA_LED_MAX          // LED参数最大值
 };
 
 enum PantiltOpcode {
-    OP_PANTILT_UP = 0,
-    OP_PANTILT_DOWN,
-    OP_PANTILT_LEFT,
-    OP_PANTILT_RIGHT,
-    OP_PANTILT_RESET,
-    OP_PANTILT_MAX
+    OP_PANTILT_UP = 0,      // 上
+    OP_PANTILT_DOWN,        // 下
+    OP_PANTILT_LEFT,        // 左
+    OP_PANTILT_RIGHT,       // 右
+    OP_PANTILT_RESET,       // 重置
+    OP_PANTILT_MAX          // 摄像头控制操作码最大值
 };
 
 enum DisplayOpcode {
-    OP_DISPLAY_PAUSE = 0,
-    OP_DISPLAY_RESUME,
-    OP_DISPLAY_MAX
+    OP_DISPLAY_PAUSE = 0,   // 暂停
+    OP_DISPLAY_RESUME,      // 恢复
+    OP_DISPLAY_MAX          // 显示操作码最大值
 };
 
 enum VideoOpcode {
-    OP_VIDEO_PIPE0_START = 0,
-    OP_VIDEO_PIPE0_STOP,
-    OP_VIDEO_PIPE0_RESTART,
-    OP_VIDEO_PIPE1_START,
-    OP_VIDEO_PIPE1_STOP,
-    OP_VIDEO_PIPE1_RESTART,
-    OP_VIDEO_MAX
+    OP_VIDEO_PIPE0_START = 0,   // 开启管道0
+    OP_VIDEO_PIPE0_STOP,        // 关闭管道0
+    OP_VIDEO_PIPE0_RESTART,     // 重启管道0
+    OP_VIDEO_PIPE1_START,       // 开启管道1
+    OP_VIDEO_PIPE1_STOP,        // 关闭管道1
+    OP_VIDEO_PIPE1_RESTART,     // 重启管道1
+    OP_VIDEO_MAX                // 视频操作码最大值
 };
 
 class Control {
@@ -70,7 +70,8 @@ public:
     Control();
     ~Control();
 
-    Signal<ControlSignal> signal_control_received;
+    // 控制信号接收槽函数
+    Signal<ControlSignal> signal_control_received;          
 
     // 接收网络数据槽函数
     void onNetworkReceived(const std::string& data);
