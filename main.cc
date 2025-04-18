@@ -1,4 +1,6 @@
-#include "video.h"		// video
+#include "videoRTSP.h"	// videoRTSP
+#include "videoYOLO.h"	// videoYOLO
+#include "videoLCD.h"	// videoLCD
 #include "display.h"	// lcd
 #include "led.h"		// led
 #include "pantilt.h"	// pantilt
@@ -32,7 +34,10 @@ int main(int argc, char *argv[])
 	
 	// 实例化对象
 	LOG_INFO("video Module init\n");	
-	Video video;
+	// Video video;
+    VideoRTSP rtsp_video;
+    VideoLCD  lcd_video;
+    VideoYOLO yolo_video;
 
 	LOG_INFO("lcd Module init\n");
 	Display lcd;
@@ -52,7 +57,7 @@ int main(int argc, char *argv[])
 
 	// 连接 video 与 lcd
 	// sender.signal.connect(&receiver, &Receiver::receiveData);
-	video.video_frame_signal.connect(&lcd, &Display::push_frame);
+	lcd_video.video_frame_signal.connect(&lcd, &Display::push_frame);
 
 	LOG_INFO("onvif Module init\n");
 	onvif_server_init();
@@ -61,7 +66,7 @@ int main(int argc, char *argv[])
 	{	
 		sleep(1);
 	}
-
+	
 	rk_param_deinit();
     LOG_INFO("Program exited\n");
 	return 0;
