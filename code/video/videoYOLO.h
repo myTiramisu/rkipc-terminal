@@ -1,8 +1,8 @@
 #ifndef VIDEOYOLO_H
 #define VIDEOYOLO_H
 
-#include "video.h"
-class VideoYOLO : public Video
+#include "videobase.h"
+class VideoYOLO : public VideoBase
 {
 protected:
     void video_thread_func() override;

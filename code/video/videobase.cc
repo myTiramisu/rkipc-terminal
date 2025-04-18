@@ -1,21 +1,21 @@
-#include "video.h"
-Video::Video()
+#include "videobase.h"
+VideoBase ::VideoBase ()
 {
     quit_flag = false;
     video_thread = nullptr;
 }
-Video::~Video()
+VideoBase ::~VideoBase ()
 {
     stop_thread();
     LOG_DEBUG("******************************Release video success\n");
 }
 
-void Video::start_thread()
+void VideoBase ::start_thread()
 {
-    video_thread = new std::thread(&Video::video_thread_func, this);
+    video_thread = new std::thread(&VideoBase::video_thread_func, this);
 }
 
-void Video::stop_thread()
+void VideoBase::stop_thread()
 {
     {
         std::lock_guard<std::mutex> lock(mutex_video);

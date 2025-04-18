@@ -1,5 +1,5 @@
-#ifndef _VIDEO_H_
-#define _VIDEO_H_
+#ifndef _VIDEOBASE_H_
+#define _VIDEOBASE_H_
 extern "C" {
     #include "luckfox_video.h"
     #include "rtsp.h"
@@ -20,19 +20,20 @@ extern "C" {
 #include "luckfox_osd.h"
 #include "luckfox_osd_draw.h"
 
-class Video
+class VideoBase
 {
 protected:
     // 线程
     std::thread *video_thread;
     std::mutex  mutex_video;
     bool quit_flag;
-
+    
+    // 线程函数
     virtual void video_thread_func() = 0;  // 纯虚函数，每个派生类必须实现
  
 public:
-    Video();
-    virtual  ~Video();
+    VideoBase();
+    virtual  ~VideoBase();
     
     void start_thread();
     void stop_thread();

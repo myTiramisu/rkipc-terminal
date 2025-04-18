@@ -1,9 +1,9 @@
 #ifndef VIDEO_LCD_H
 #define VIDEO_LCD_H
 
-#include "video.h"
+#include "videobase.h"
 
-class VideoLCD : public Video
+class VideoLCD : public VideoBase
 {
 protected:
     void video_thread_func() override;

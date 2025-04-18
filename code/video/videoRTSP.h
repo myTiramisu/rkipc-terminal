@@ -1,8 +1,8 @@
 #ifndef VIDEORTSP_H
 #define VIDEORTSP_H
-#include "video.h"
+#include "videobase.h"
 
-class VideoRTSP : public Video
+class VideoRTSP : public VideoBase
 {
 protected:
     void video_thread_func() override;
