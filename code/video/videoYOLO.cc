@@ -1,30 +1,49 @@
 #include "videoYOLO.h"
 
-VideoYOLO::VideoYOLO()
+VideoYOLO::VideoYOLO(int pipeId, int viChannelId, int vencChannelId, int width, int height)
+: pipeId(pipeId), viChannelId(viChannelId),  vencChannelId(vencChannelId), video_width(width), video_height(height)
 {
-    // 初始化特定于 YOLO 的资源
-    start_thread();
+    // pipeId = 0;
+    // viChannelId = 2;
+    // video_width = 640;
+    // video_height = 640;
+    rgn_video_width = 2304;
+    rgn_video_height = 1296;
+
+    quit_flag = false;
+    video_thread = new std::thread(&VideoYOLO::video_thread_func, this);
 }
 
 VideoYOLO::~VideoYOLO()
 {
-    stop_thread();
+    quit_flag = true;
+    if(video_thread->joinable())
+        video_thread->join();
+    delete video_thread;
+    LOG_DEBUG("******************************VideoLCD exit\n");
 }
 
+void VideoYOLO::videoCapture() 
+{
+    vi_get_frame(pipeId, viChannelId, video_width, video_height, &stViFrame);
+}
 
+void VideoYOLO::videoEncode() 
+{
+    // 无需编码器
+    LOG_DEBUG("******************************VideoYOLO encode free\n");
+}
+
+void VideoYOLO::videoRtspTransmit() 
+ {
+    // 无需传输
+    LOG_DEBUG("******************************VideoYOLO rtsp transmit free\n");
+ }
 
 void VideoYOLO::video_thread_func()
 {
     LOG_DEBUG("************************video_thread_2 started success\n");
-    int pipeId = 0;
-    int viChannelId = 2;
-    int vencChannelId = 2;
-    int video_width = 640;
-    int video_height = 640;
-    int rgn_video_width = 2304;
-    int rgn_video_height = 1296;
 
-    VIDEO_FRAME_INFO_S stViFrame;
     cv::Mat yuv420sp(video_height + video_height / 2, video_width, CV_8UC1);
     cv::Mat bgr(video_height, video_width, CV_8UC3);
 

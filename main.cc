@@ -3,6 +3,9 @@
 #include "videoYOLO.h"	// videoYOLO
 #include "videoLCD.h"	// videoLCD
 #include "display.h"	// lcd
+#include "videoLCD_factory.h"
+#include "videoRTSP_factory.h"
+#include "videoYOLO_factory.h"
 #include "led.h"		// led
 #include "pantilt.h"	// pantilt
 #include "log.h"		// log
@@ -16,7 +19,7 @@
 #define PTZ_ENABLE 				1
 #define DISPLAY_ENABLE 			1
 #define VIDEORTSP_ENABLE 		1
-#define VIDEOLCD_ENABLE 		1
+#define VIDEODISPLAY_ENABLE 	1
 #define VIDEOYOLO_ENABLE 		1
 
 char ini_path[] = "rkipc.ini";
@@ -42,18 +45,18 @@ int main(int argc, char *argv[])
 	// Ctrl-c quit
 	signal(SIGINT, sigterm_handler);
 
-#ifdef ONVIF_SERVER_ENABLE
+#if ONVIF_SERVER_ENABLE
 	LOG_INFO("onvif Module init\n");
 	onvif_server_init();
 #endif
 
 
-#ifdef CONTROL_ENABLE
+#if CONTROL_ENABLE
 	
 #endif
 
 
-#ifdef LED_ENABLE
+#if LED_ENABLE
 	// LED模块
 	LOG_INFO("led Module init\n");
 	Led *led0 = new Led(LED0);
@@ -65,36 +68,39 @@ int main(int argc, char *argv[])
 #endif
 
 
-#ifdef PTZ_ENABLE
+#if PTZ_ENABLE
 	// 俯仰旋转控制
 	LOG_INFO("PTZ Module init\n");
 	Pantilt *pantilt = new Pantilt();
 #endif
 
 
-#ifdef DISPLAY_ENABLE
+#if DISPLAY_ENABLE
 	LOG_INFO("display Module init\n");
 	Display *display = new Display();
 #endif
 
-#ifdef VIDEORTSP_ENABLE
+#if VIDEORTSP_ENABLE
 	LOG_INFO("VideoRTSP Module init\n");
-	VideoBase* rtsp_video = new VideoRTSP();
+	VideoFactory* videoRtspFactory = new VideoRTSPFactory();
+	VideoBase* videoRtsp = videoRtspFactory->createVideo(0, 0, 0, 2304, 1296);
 #endif
 
-#ifdef VIDEOLCD_ENABLE
-	LOG_INFO("VideoLCD Module init\n");	
-	VideoBase* lcd_video = new VideoLCD();
+#if VIDEODISPLAY_ENABLE
+	LOG_INFO("VideoDipplay Module init\n");	
+	VideoFactory* videoDiaplayFactory = new VideoLCDFactory();
+	VideoBase* videoDiaplsy = videoDiaplayFactory->createVideo(0, 1, 1, 720, 480);
 #endif
 
-#ifdef VIDEOYOLO_ENABLE
-	LOG_INFO("VideoYOLO Module init\n");	
-	VideoBase* yolo_video = new VideoYOLO();
+#if VIDEOYOLO_ENABLE
+	LOG_INFO("VideoYOLO Module init\n");
+	VideoFactory* videoYoloFactory = new VideoYOLOFactory();
+	VideoBase* videoYolo = videoYoloFactory->createVideo(0, 2, 2, 640, 640);
 #endif
 
-#if VIDEOLCD_ENABLE && DISPLAY_ENABLE
+#if VIDEODISPLAY_ENABLE && DISPLAY_ENABLE
 	LOG_INFO("videoDisplay connect to display\n");
-	lcd_video->video_frame_signal.connect(display, &Display::push_frame);
+	videoDiaplsy->video_frame_signal.connect(display, &Display::push_frame);
 #endif
 	
 
@@ -104,39 +110,42 @@ int main(int argc, char *argv[])
 	}
 
 
-#ifdef CONTROL_ENABLE
+#if CONTROL_ENABLE
 
 #endif
 
 
-#ifdef LED_ENABLE
+#if LED_ENABLE
 	delete led0;
 	delete led1;
 	delete led2;	
 #endif
 
 
-#ifdef PTZ_ENABLE
+#if PTZ_ENABLE
 	delete pantilt;
 #endif
 
 
-#ifdef DISPLAY_ENABLE
+#if DISPLAY_ENABLE
 	delete display;
 #endif
 
-#ifdef VIDEORTSP_ENABLE
-    delete rtsp_video;
+#if VIDEORTSP_ENABLE
+	delete videoRtsp;
+	delete videoRtspFactory;
+	
 #endif
 
-#ifdef VIDEOLCD_ENABLE
-	delete lcd_video;
+#if VIDEODISPLAY_ENABLE
+	delete videoDiaplsy;
+	delete videoDiaplayFactory;
 #endif
 
-#ifdef VIDEOYOLO_ENABLE
-	delete yolo_video;
+#if VIDEOYOLO_ENABLE
+	delete videoYolo;
+	delete videoDiaplayFactory;
 #endif
-
 
 	rk_param_deinit();
     LOG_INFO("Program exited\n");

@@ -23,20 +23,13 @@ extern "C" {
 class VideoBase
 {
 protected:
-    // 线程
-    std::thread *video_thread;
-    std::mutex  mutex_video;
-    bool quit_flag;
-    
-    // 线程函数
-    virtual void video_thread_func() = 0;  // 纯虚函数，每个派生类必须实现
- 
+    virtual void videoCapture() = 0;
+    virtual void videoEncode() = 0;
+    virtual void videoRtspTransmit() = 0;
+
 public:
     VideoBase();
     virtual  ~VideoBase();
-    
-    void start_thread();
-    void stop_thread();
 
     // 发送摄像头数据帧信号
     Signal<cv::Mat> video_frame_signal;

@@ -3,7 +3,7 @@
 #include "rtsp_demo.h"
 #include "rk_mpi_venc.h"
 #include "rk_mpi_mb.h"
-
+#include "log.h"
 
 pthread_mutex_t g_mutex;
 // rtsp demo handle
@@ -97,7 +97,7 @@ int rtsp_send_frame_h264(int channelId, VENC_STREAM_S* stFrame)
             break;
         
             default:
-                printf("!!!!!!!!!!!!!!!!!!!!!channelId error!");
+                LOG_ERROR("rtsp_send_frame_h264 channelId error!");
                 break;
         }
     }
