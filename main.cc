@@ -10,17 +10,24 @@
 #include "pantilt.h"	// pantilt
 #include "log.h"		// log
 #include "param.h"		// param
+#include "control.h"
 #include <unistd.h>
 #include "onvif_server.h"
+#include "factory.h"
+#include "ControlCenter.h"
+
 
 #define ONVIF_SERVER_ENABLE 	1
-#define CONTROL_ENABLE 			1
+
 #define LED_ENABLE 				1
 #define PTZ_ENABLE 				1
 #define DISPLAY_ENABLE 			1
+
 #define VIDEORTSP_ENABLE 		1
 #define VIDEODISPLAY_ENABLE 	1
 #define VIDEOYOLO_ENABLE 		1
+
+#define CONTROLLER_ENABLE 		1
 
 char ini_path[] = "rkipc.ini";
 int rkipc_log_level = LOG_LEVEL_DEBUG;
@@ -51,56 +58,61 @@ int main(int argc, char *argv[])
 #endif
 
 
-#if CONTROL_ENABLE
-	
+#if CONTROLLER_ENABLE
+	LOG_INFO("controller Module init\n");
+	ControlCenter *controllor = new ControlCenter();
 #endif
-
 
 #if LED_ENABLE
 	// LED模块
 	LOG_INFO("led Module init\n");
-	Led *led0 = new Led(LED0);
-	Led *led1 = new Led(LED1);
-	Led *led2 = new Led(LED2);	
-	led0->off();
-	led1->off();
-	led2->off();
-#endif
+	std::unique_ptr<Module> led0 = DeviceFactory::createLedDevice(LED0);
+	std::unique_ptr<Module> led1 = DeviceFactory::createLedDevice(LED1);
+	std::unique_ptr<Module> led2 = DeviceFactory::createLedDevice(LED2);
+	controllor->addObserver(led0.get());
+	controllor->addObserver(led1.get());
+	controllor->addObserver(led2.get());
 
+#endif
 
 #if PTZ_ENABLE
 	// 俯仰旋转控制
 	LOG_INFO("PTZ Module init\n");
-	Pantilt *pantilt = new Pantilt();
+	std::unique_ptr<Module> ptz = DeviceFactory::createDevice("PTZ");
+	controllor->addObserver(ptz.get());
 #endif
-
 
 #if DISPLAY_ENABLE
 	LOG_INFO("display Module init\n");
-	Display *display = new Display();
+	std::unique_ptr<Module> display = DeviceFactory::createDevice("DISPLAY");
+	controllor->addObserver(display.get());
 #endif
 
 #if VIDEORTSP_ENABLE
 	LOG_INFO("VideoRTSP Module init\n");
 	VideoFactory* videoRtspFactory = new VideoRTSPFactory();
 	VideoBase* videoRtsp = videoRtspFactory->createVideo(0, 0, 0, 2304, 1296);
+	controllor->addObserver(videoRtsp);
 #endif
 
 #if VIDEODISPLAY_ENABLE
 	LOG_INFO("VideoDipplay Module init\n");	
 	VideoFactory* videoDiaplayFactory = new VideoLCDFactory();
 	VideoBase* videoDiaplsy = videoDiaplayFactory->createVideo(0, 1, 1, 720, 480);
+	controllor->addObserver(videoDiaplsy);
 #endif
 
 #if VIDEOYOLO_ENABLE
 	LOG_INFO("VideoYOLO Module init\n");
 	VideoFactory* videoYoloFactory = new VideoYOLOFactory();
 	VideoBase* videoYolo = videoYoloFactory->createVideo(0, 2, 2, 640, 640);
+	controllor->addObserver(videoYolo);
 #endif
 
 #if VIDEODISPLAY_ENABLE && DISPLAY_ENABLE
 	LOG_INFO("videoDisplay connect to display\n");
-	videoDiaplsy->video_frame_signal.connect(display, &Display::push_frame);
+	// 使用lambda表达式连接信号与槽
+	videoDiaplsy->video_frame_signal.connect(dynamic_cast<Display*>(display.get()), &Display::push_frame);
 #endif
 	
 
@@ -110,42 +122,38 @@ int main(int argc, char *argv[])
 	}
 
 
-#if CONTROL_ENABLE
 
-#endif
+try {
+	#if VIDEORTSP_ENABLE
+		delete videoRtsp;
+		delete videoRtspFactory;
+		
+	#endif
+
+	#if VIDEODISPLAY_ENABLE
+		delete videoDiaplsy;
+		delete videoDiaplayFactory;
+	#endif
+
+	#if VIDEOYOLO_ENABLE
+		delete videoYolo;
+		delete videoDiaplayFactory;
+	#endif
+
+	#if CONTROLLER_ENABLE
+		delete controllor;
+	#endif
 
 
-#if LED_ENABLE
-	delete led0;
-	delete led1;
-	delete led2;	
-#endif
+	} catch (std::exception &e) {
+        LOG_ERROR("Exception: %s\n", e.what());
+    }
 
 
-#if PTZ_ENABLE
-	delete pantilt;
-#endif
 
 
-#if DISPLAY_ENABLE
-	delete display;
-#endif
 
-#if VIDEORTSP_ENABLE
-	delete videoRtsp;
-	delete videoRtspFactory;
-	
-#endif
 
-#if VIDEODISPLAY_ENABLE
-	delete videoDiaplsy;
-	delete videoDiaplayFactory;
-#endif
-
-#if VIDEOYOLO_ENABLE
-	delete videoYolo;
-	delete videoDiaplayFactory;
-#endif
 
 	rk_param_deinit();
     LOG_INFO("Program exited\n");

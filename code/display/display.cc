@@ -1,4 +1,6 @@
 #include "display.h"
+#include "log.h"
+
 extern "C" {
     #include "framebuffer.h"
 }
@@ -47,6 +49,18 @@ Display::~Display()
     std::cout << "display quit success";
 
 }
+
+void Display::update(const std::string& message, const std::string& mode) {
+    if (message != "display") return;
+
+    std::lock_guard<std::mutex> lock(mutex);
+    if (mode == "pause") pause_flag = true;
+    else if (mode == "resume") pause_flag = false;
+    else if (mode == "clear") {
+        while (!queue.empty()) queue.pop();
+    } else LOG_ERROR("Unknown Display action: %s\n", mode.c_str());
+}
+
 
  // 接收帧并将其放入队列
 void Display::push_frame(const cv::Mat& frame)

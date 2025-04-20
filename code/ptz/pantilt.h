@@ -1,17 +1,18 @@
 #pragma once
 
-
+#include "module.h"
 #include "log.h"
 #include "param.h"
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include "observer.h"
 
 extern "C" {
     #include "pwm.h"
 }
 
-class Pantilt {
+class Pantilt : public Module{
 public:
     Pantilt();
     ~Pantilt();
@@ -27,6 +28,8 @@ public:
     void onAjustPantilt(int delta_pan, int delta_tilt);
 
     void reset();
+
+    void update(const std::string& message, const std::string& mode) override;
 
 private:
     // 当前Pan角度，范围：-180°~180°，角度大于0表示向左，小于0表示向右

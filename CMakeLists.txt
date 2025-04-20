@@ -45,6 +45,7 @@ file(GLOB SRC_FILES
                     "${CODE_DIR}/control/*.cpp"
                     "${CODE_DIR}/onvif/soap/*.c"
                     "${CODE_DIR}/onvif/server/*.c"
+                    "${CODE_DIR}/*.c"
                     "*.cc" 
 )  
 

@@ -2,9 +2,10 @@
 #pragma once
 
 #include <mutex>
-
+#include "module.h"
 #include "signal_slot.h"
 #include "gpio.h"
+#include "observer.h"
 
 // LED Resources
 enum Led_num {
@@ -13,7 +14,8 @@ enum Led_num {
     LED2 = GPIO2_A2_d,
 };
 
-class Led {
+class Led : public Module
+{
 public:
     Led(enum Led_num led_num);
 
@@ -35,6 +37,7 @@ public:
 
     void set_blink_frequency(int blink_frequency);
 
+    void update(const std::string& message, const std::string& mode) override;
 private:
     enum Led_num led_num_;  // LED 对应的 GPIO 号
     
