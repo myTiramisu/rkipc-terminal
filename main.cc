@@ -15,6 +15,9 @@
 #include "onvif_server.h"
 #include "factory.h"
 #include "ControlCenter.h"
+#include "server.h"
+#include "uart.h"
+#include <atomic>
 
 
 #define ONVIF_SERVER_ENABLE 	1
@@ -29,14 +32,20 @@
 
 #define CONTROLLER_ENABLE 		1
 
+#define UART_ENABLE 			1
+#define TCP_SERVER_ENABLE 		1
+
+
 char ini_path[] = "rkipc.ini";
 int rkipc_log_level = LOG_LEVEL_DEBUG;
 
-bool quit = false;
+std::atomic<bool> g_quit(false);	//全局标志位
+
 static void sigterm_handler(int sig) {
-	fprintf(stderr, "signal %d\n", sig);
-	std::cout << "**************quit success sig:" << sig << std::endl;
-	quit = true;
+	if (sig == SIGINT) {
+        g_quit = true; // 设置标志位
+		std::cout << "**************quit success sig:" << sig << std::endl;
+    }
 }
 
 int main(int argc, char *argv[]) 
@@ -57,7 +66,6 @@ int main(int argc, char *argv[])
 	onvif_server_init();
 #endif
 
-
 #if CONTROLLER_ENABLE
 	LOG_INFO("controller Module init\n");
 	ControlCenter *controllor = new ControlCenter();
@@ -72,7 +80,6 @@ int main(int argc, char *argv[])
 	controllor->addObserver(led0.get());
 	controllor->addObserver(led1.get());
 	controllor->addObserver(led2.get());
-
 #endif
 
 #if PTZ_ENABLE
@@ -115,46 +122,73 @@ int main(int argc, char *argv[])
 	videoDiaplsy->video_frame_signal.connect(dynamic_cast<Display*>(display.get()), &Display::push_frame);
 #endif
 	
+#if UART_ENABLE
+	Uart* uart = new Uart(4);
+	LOG_INFO("uart Module init\n");
+#endif
 
-  	while(!quit)
+#if TCP_SERVER_ENABLE
+	TcpServer* tcpServer = new TcpServer(8888);
+	LOG_INFO("tcpServer Module init\n");
+#endif
+
+
+#if UART_ENABLE && TCP_SERVER_ENABLE
+	// 绑定tcp数据到串口发送
+	uart->uart_signal.connect(tcpServer, &TcpServer::send_msg);	
+	// 绑定串口数据发送到TCP客户端
+	tcpServer->server_signal.connect(uart, &Uart::sendData);
+#endif
+
+  	while(!g_quit)
 	{	
-		sleep(1);
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));	// 休眠500ms
 	}
 
-
+ 	LOG_INFO("Program starting exited\n");
 
 try {
 	#if VIDEORTSP_ENABLE
 		delete videoRtsp;
+		videoRtsp = nullptr;
 		delete videoRtspFactory;
-		
+		videoRtspFactory = nullptr;
 	#endif
 
 	#if VIDEODISPLAY_ENABLE
 		delete videoDiaplsy;
+		videoDiaplsy = nullptr;
 		delete videoDiaplayFactory;
+		videoDiaplayFactory = nullptr;
 	#endif
 
 	#if VIDEOYOLO_ENABLE
 		delete videoYolo;
+		videoYolo = nullptr;
 		delete videoDiaplayFactory;
+		videoYoloFactory = nullptr;
 	#endif
 
 	#if CONTROLLER_ENABLE
 		delete controllor;
+		controllor = nullptr;
 	#endif
 
+	#if UART_ENABLE
+		delete uart;
+		uart = nullptr;
+	#endif
+
+	#if TCP_SERVER_ENABLE
+		delete tcpServer;
+		tcpServer = nullptr;
+	#endif
 
 	} catch (std::exception &e) {
         LOG_ERROR("Exception: %s\n", e.what());
     }
 
-
-
-
-
-
-
+	// delete tcpServer;
 	rk_param_deinit();
     LOG_INFO("Program exited\n");
 	return 0;

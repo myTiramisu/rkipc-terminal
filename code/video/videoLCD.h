@@ -23,7 +23,6 @@ private:
     int vencChannelId;
     int video_width;
     int video_height;
-
     VIDEO_FRAME_INFO_S stViFrame;       // 视频帧信息结构体
     VENC_STREAM_S stFrame;              // 视频帧流结构体
     VIDEO_FRAME_INFO_S venc_frame;      // 编码帧结构体
