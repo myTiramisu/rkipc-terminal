@@ -47,20 +47,20 @@ TcpServer::~TcpServer() {
 }
 void TcpServer::timer_func() 
 {
-    while (timer_running) 
-    {
-        // 每隔 2 秒
-        std::this_thread::sleep_for(std::chrono::seconds(2)); 
+    // while (timer_running) 
+    // {
+    //     // 每隔 2 秒
+    //     std::this_thread::sleep_for(std::chrono::seconds(2)); 
 
-        // 向所有客户端发送数据
-        std::lock_guard<std::mutex> lock(mutex);
-        for (auto& thread : client_threads) {
-            if (thread.joinable()) {
-                const char* message = "Server heartbeat\n";
-                write(clientSocket, message, strlen(message));
-            }
-        }
-    }
+    //     // 向所有客户端发送数据
+    //     std::lock_guard<std::mutex> lock(mutex);
+    //     for (auto& thread : client_threads) {
+    //         if (thread.joinable()) {
+    //             const char* message = "Server heartbeat\n";
+    //             write(clientSocket, message, strlen(message));
+    //         }
+    //     }
+    // }
 }
 // 服务器等待客户端连接线程
 void TcpServer::server_thread_func()
@@ -97,7 +97,7 @@ void TcpServer::client_handler(int clientSocket) {
             break;
         }
 
-        LOG_INFO("Received message from client: %s\n", buffer);
+        LOG_INFO("Received message from client:%s\n", buffer);
         // 发送服务器接收到客户端的信号
         server_signal.emit(buffer);
     }
@@ -106,6 +106,7 @@ void TcpServer::client_handler(int clientSocket) {
 
 void TcpServer::send_msg(const std::string& msg)
 {
+    //LOG_DEBUG("Send message to client: %s\n", msg.c_str());
     {
         std::lock_guard<std::mutex> lock(mutex);
         for (auto& thread : client_threads) {

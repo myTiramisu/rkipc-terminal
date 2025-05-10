@@ -38,12 +38,12 @@ Uart::Uart(int port) {
         LOG_ERROR("Failed to set serial port attributes\n");
         return;
     }
-    
+
     receive_thread = new std::thread(&Uart::receive_thread_func, this);
 
     quit_flag = false;
 
-    LOG_DEBUG("Usart%d Serial port opened successfully\n",port_num);
+    LOG_DEBUG("********************************Usart%d Serial port opened successfully\n",port_num);
 }
 Uart::~Uart() {
     {
@@ -56,15 +56,14 @@ Uart::~Uart() {
 // receive STM32 data
 void Uart::receive_thread_func()
 {
+    LOG_INFO("********************************Usart%d receive thread started\n",port_num);
     while (!quit_flag) {
         int bytes_read = read(serial_fd, recv_buf, sizeof(recv_buf));
-        if (bytes_read > 0) {
-            recv_buf[bytes_read] = '\0';
-            printf("\rrx_buffer: \n %s ", recv_buf);
+        // 过滤回车
+        if (bytes_read > 1) {
+            // LOG_DEBUG("rx_buffer: %s", recv_buf);
             uart_signal.emit(recv_buf);
-            LOG_DEBUG("Received %d bytes: %s\n", bytes_read, recv_buf);
-        } else {
-            printf("No data received.\n");
+            memset(recv_buf, 0, sizeof(recv_buf));
         }
     }    
 }
@@ -72,6 +71,7 @@ void Uart::receive_thread_func()
 // RV1106 send to STM32
  void Uart::sendData(const std::string& data)
  {
+    LOG_DEBUG("********************************Usart%d sendData: %s\n",port_num, data.c_str());
     int bytes_written = write(serial_fd, data.c_str(), data.size());
     if (bytes_written == -1) {
         LOG_ERROR("Failed to send data to serial port\n");

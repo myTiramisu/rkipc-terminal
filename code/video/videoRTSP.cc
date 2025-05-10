@@ -10,6 +10,7 @@ VideoRTSP::VideoRTSP(int pipeId, int viChannelId, int vencChannelId, int width, 
     // vencChannelId = 0;     // VENC channel id
 
     quit_flag = false;
+    
     // 初始化特定于 RTSP 的资源
     rkaiq_init();
     rkmpi_sys_init();
@@ -26,6 +27,8 @@ VideoRTSP::~VideoRTSP()
     vi_dev_deinit();
     rkmpi_sys_deinit();
     rkaiq_deinit();
+
+    quit_flag = true;
 
     if(video_thread->joinable()) {
         video_thread->join();

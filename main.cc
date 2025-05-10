@@ -20,17 +20,17 @@
 #include <atomic>
 
 
-#define ONVIF_SERVER_ENABLE 	1
+#define ONVIF_SERVER_ENABLE 	0
 
-#define LED_ENABLE 				1
-#define PTZ_ENABLE 				1
-#define DISPLAY_ENABLE 			1
+#define LED_ENABLE 				0
+#define PTZ_ENABLE 				0
+#define DISPLAY_ENABLE 			0
 
 #define VIDEORTSP_ENABLE 		1
-#define VIDEODISPLAY_ENABLE 	1
-#define VIDEOYOLO_ENABLE 		1
+#define VIDEODISPLAY_ENABLE 	0
+#define VIDEOYOLO_ENABLE 		0
 
-#define CONTROLLER_ENABLE 		1
+#define CONTROLLER_ENABLE 		0
 
 #define UART_ENABLE 			1
 #define TCP_SERVER_ENABLE 		1
@@ -52,11 +52,11 @@ int main(int argc, char *argv[])
 {
   	system("RkLunch-stop.sh");
 	
-	// 初始化参数
-    if (rk_param_init(ini_path) != 0) {
-        LOG_ERROR("Failed to initialize parameters\n");
-        return EXIT_FAILURE;
-    }
+	// // 初始化参数
+    // if (rk_param_init(ini_path) != 0) {
+    //     LOG_ERROR("Failed to initialize parameters\n");
+    //     return EXIT_FAILURE;
+    // }
 
 	// Ctrl-c quit
 	signal(SIGINT, sigterm_handler);
@@ -69,6 +69,7 @@ int main(int argc, char *argv[])
 #if CONTROLLER_ENABLE
 	LOG_INFO("controller Module init\n");
 	ControlCenter *controllor = new ControlCenter();
+	// controllor->addObserver(videoRtsp);
 #endif
 
 #if LED_ENABLE
@@ -99,7 +100,7 @@ int main(int argc, char *argv[])
 	LOG_INFO("VideoRTSP Module init\n");
 	VideoFactory* videoRtspFactory = new VideoRTSPFactory();
 	VideoBase* videoRtsp = videoRtspFactory->createVideo(0, 0, 0, 2304, 1296);
-	controllor->addObserver(videoRtsp);
+	
 #endif
 
 #if VIDEODISPLAY_ENABLE
@@ -113,7 +114,7 @@ int main(int argc, char *argv[])
 	LOG_INFO("VideoYOLO Module init\n");
 	VideoFactory* videoYoloFactory = new VideoYOLOFactory();
 	VideoBase* videoYolo = videoYoloFactory->createVideo(0, 2, 2, 640, 640);
-	controllor->addObserver(videoYolo);
+	// controllor->addObserver(videoYolo);
 #endif
 
 #if VIDEODISPLAY_ENABLE && DISPLAY_ENABLE
@@ -124,7 +125,7 @@ int main(int argc, char *argv[])
 	
 #if UART_ENABLE
 	Uart* uart = new Uart(4);
-	LOG_INFO("uart Module init\n");
+	LOG_INFO("uart Module init success\n");
 #endif
 
 #if TCP_SERVER_ENABLE
@@ -165,7 +166,7 @@ try {
 	#if VIDEOYOLO_ENABLE
 		delete videoYolo;
 		videoYolo = nullptr;
-		delete videoDiaplayFactory;
+		delete videoYoloFactory;
 		videoYoloFactory = nullptr;
 	#endif
 
@@ -189,7 +190,7 @@ try {
     }
 
 	// delete tcpServer;
-	rk_param_deinit();
+	// rk_param_deinit();
     LOG_INFO("Program exited\n");
 	return 0;
 }
