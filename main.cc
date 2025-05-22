@@ -13,21 +13,20 @@
 #include "control.h"
 #include <unistd.h>
 #include "onvif_server.h"
-#include "factory.h"
 #include "server.h"
 #include "uart.h"
 #include <atomic>
 
 
-#define ONVIF_SERVER_ENABLE 	1
+#define ONVIF_SERVER_ENABLE 	0
 
-#define LED_ENABLE 				1
-#define PTZ_ENABLE 				1
-#define DISPLAY_ENABLE 			1
+#define LED_ENABLE 				0
+#define PTZ_ENABLE 				0
+#define DISPLAY_ENABLE 			0
 
-#define VIDEORTSP_ENABLE 		1
-#define VIDEODISPLAY_ENABLE 	1
-#define VIDEOYOLO_ENABLE 		1
+#define VIDEORTSP_ENABLE 		0
+#define VIDEODISPLAY_ENABLE 	0
+#define VIDEOYOLO_ENABLE 		0
 
 #define UART_ENABLE 			0
 #define TCP_SERVER_ENABLE 		0

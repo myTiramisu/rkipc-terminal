@@ -7,9 +7,10 @@
 #include <thread>
 #include <opencv2/opencv.hpp>
 #include <iostream>
-#include "module.h"
+// #include "module.h"
+#include "abstractModule.h"
 
-class Display : public Module
+class Display : public AbstractModule
 {
 public:
     Display();

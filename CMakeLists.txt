@@ -42,6 +42,7 @@ file(GLOB SRC_FILES
                     "${CODE_DIR}/led/*.c"
                     "${CODE_DIR}/ptz/*.cpp"
                     "${CODE_DIR}/ptz/*.c"
+                    "${CODE_DIR}/factory/*.cpp"
                     "${CODE_DIR}/tcp/*.cpp"
                     "${CODE_DIR}/control/*.cpp"
                     "${CODE_DIR}/onvif/soap/*.c"
@@ -110,6 +111,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
                             ${CMAKE_CURRENT_SOURCE_DIR}/code/onvif/soap
                             ${CMAKE_CURRENT_SOURCE_DIR}/code/onvif/server
                             ${CMAKE_CURRENT_SOURCE_DIR}/code/tcp
+                            ${CMAKE_CURRENT_SOURCE_DIR}/code/factory
                           )
 
 message(STATUS "model dir PATH:model")

@@ -2,9 +2,10 @@
 #pragma once
 
 #include <mutex>
-#include "module.h"
+// #include "module.h"
 #include "signal_slot.h"
 #include "gpio.h"
+#include "abstractModule.h"
 
 // LED Resources
 enum Led_num {
@@ -13,7 +14,7 @@ enum Led_num {
     LED2 = GPIO2_A2_d,
 };
 
-class Led : public Module
+class Led : public AbstractModule
 {
 public:
     Led(enum Led_num led_num);

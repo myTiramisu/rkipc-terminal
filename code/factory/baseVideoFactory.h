@@ -1,3 +1,5 @@
+#pragma once
+
 #include "abstractFactory.h"
 #include "abstractModule.h"
 

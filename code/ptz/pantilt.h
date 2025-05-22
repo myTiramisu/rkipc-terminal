@@ -1,17 +1,19 @@
 #pragma once
 
-#include "module.h"
+// #include "module.h"
 #include "log.h"
 #include "param.h"
 #include <thread>
 #include <mutex>
 #include <condition_variable>
+#include "abstractModule.h"
 
 extern "C" {
     #include "pwm.h"
 }
 
-class Pantilt : public Module{
+class Pantilt : public AbstractModule 
+{
 public:
     Pantilt();
     ~Pantilt();
