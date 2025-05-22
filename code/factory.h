@@ -21,7 +21,6 @@ public:
             throw std::invalid_argument("Unknown device type");
         }
     }
-
     static std::unique_ptr<Module> createLedDevice(enum Led_num led_num) {
         return std::make_unique<Led>(led_num);
     }

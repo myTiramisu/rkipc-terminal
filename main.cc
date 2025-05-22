@@ -20,20 +20,20 @@
 #include <atomic>
 
 
-#define ONVIF_SERVER_ENABLE 	0
+#define ONVIF_SERVER_ENABLE 	1
 
-#define LED_ENABLE 				0
-#define PTZ_ENABLE 				0
-#define DISPLAY_ENABLE 			0
+#define LED_ENABLE 				1
+#define PTZ_ENABLE 				1
+#define DISPLAY_ENABLE 			1
 
 #define VIDEORTSP_ENABLE 		1
-#define VIDEODISPLAY_ENABLE 	0
-#define VIDEOYOLO_ENABLE 		0
+#define VIDEODISPLAY_ENABLE 	1
+#define VIDEOYOLO_ENABLE 		1
 
-#define CONTROLLER_ENABLE 		0
+#define CONTROLLER_ENABLE 		1
 
-#define UART_ENABLE 			1
-#define TCP_SERVER_ENABLE 		1
+#define UART_ENABLE 			0
+#define TCP_SERVER_ENABLE 		0
 
 
 char ini_path[] = "rkipc.ini";
