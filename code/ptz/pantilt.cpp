@@ -63,28 +63,6 @@ Pantilt::~Pantilt() {
     LOG_DEBUG("Pantilt module deinitialized\n");
 }
 
-// Pantilt.cpp
-void Pantilt::update(const std::string& message, const std::string& mode) {
-    if (message != "pantilt") return;
-
-    auto parts = split(mode, ':');
-    std::string action = parts.empty() ? "" : parts[0];
-    int step = parts.size() > 1 ? std::stoi(parts[1]) : 0;
-
-    if (action == "up") up(step);
-    else if (action == "down") down(step);
-    else if (action == "left") left(step);
-    else if (action == "right") right(step);
-    else if (action == "reset") reset();
-    else if (action == "adjust") {
-        if (parts.size() < 3) return;
-        int delta_pan = std::stoi(parts[1]);
-        int delta_tilt = std::stoi(parts[2]);
-        onAjustPantilt(delta_pan, delta_tilt);
-    } else LOG_ERROR("Unknown Pantilt action: %s\n", action.c_str());
-}
-
-
 /**
  * @brief 俯仰角上抬。
  */

@@ -8,7 +8,6 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include "module.h"
-#include "observer.h"
 
 class Display : public Module
 {
@@ -18,7 +17,6 @@ public:
  
     void push_frame(const cv::Mat& frame);   // 接收帧并将其放入队列
     
-    void update(const std::string& message, const std::string& mode) override;
 private:
     // 显示帧
     cv::Mat disp;     

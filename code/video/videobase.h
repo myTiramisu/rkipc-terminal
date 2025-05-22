@@ -27,7 +27,6 @@ protected:
     virtual void videoCapture() = 0;
     virtual void videoEncode() = 0;
     virtual void videoRtspTransmit() = 0;
-    void update(const std::string& message, const std::string& mode) override{}
 
 public:
     VideoBase();

@@ -41,22 +41,6 @@ Led::~Led() {
     LOG_DEBUG("LED %d deinitialized\n", led_num_);
 }
 
-void Led::update(const std::string& message, const std::string& mode) {
-    if (message != "led") return;
-
-    auto parts = split(mode, ':');
-    std::string action = parts.empty() ? "" : parts[0];
-    int arg = parts.size() > 1 ? std::stoi(parts[1]) : 0;
-
-    if (action == "on") on();
-    else if (action == "off") off();
-    else if (action == "toggle") toggle();
-    else if (action == "blink") blink(arg);
-    else if (action == "set_mode") set_mode(parts[1].c_str());
-    else LOG_ERROR("Unknown LED action: %s\n", action.c_str());
-}
-
-
 /**
  * @brief 打开 LED。
  */

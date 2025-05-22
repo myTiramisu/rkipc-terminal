@@ -14,7 +14,6 @@
 #include <unistd.h>
 #include "onvif_server.h"
 #include "factory.h"
-#include "ControlCenter.h"
 #include "server.h"
 #include "uart.h"
 #include <atomic>
@@ -29,8 +28,6 @@
 #define VIDEORTSP_ENABLE 		1
 #define VIDEODISPLAY_ENABLE 	1
 #define VIDEOYOLO_ENABLE 		1
-
-#define CONTROLLER_ENABLE 		1
 
 #define UART_ENABLE 			0
 #define TCP_SERVER_ENABLE 		0
@@ -78,22 +75,17 @@ int main(int argc, char *argv[])
 	std::unique_ptr<Module> led0 = DeviceFactory::createLedDevice(LED0);
 	std::unique_ptr<Module> led1 = DeviceFactory::createLedDevice(LED1);
 	std::unique_ptr<Module> led2 = DeviceFactory::createLedDevice(LED2);
-	controllor->addObserver(led0.get());
-	controllor->addObserver(led1.get());
-	controllor->addObserver(led2.get());
 #endif
 
 #if PTZ_ENABLE
 	// 俯仰旋转控制
 	LOG_INFO("PTZ Module init\n");
 	std::unique_ptr<Module> ptz = DeviceFactory::createDevice("PTZ");
-	controllor->addObserver(ptz.get());
 #endif
 
 #if DISPLAY_ENABLE
 	LOG_INFO("display Module init\n");
 	std::unique_ptr<Module> display = DeviceFactory::createDevice("DISPLAY");
-	controllor->addObserver(display.get());
 #endif
 
 #if VIDEORTSP_ENABLE
@@ -107,7 +99,6 @@ int main(int argc, char *argv[])
 	LOG_INFO("VideoDipplay Module init\n");	
 	VideoFactory* videoDiaplayFactory = new VideoLCDFactory();
 	VideoBase* videoDiaplsy = videoDiaplayFactory->createVideo(0, 1, 1, 720, 480);
-	controllor->addObserver(videoDiaplsy);
 #endif
 
 #if VIDEOYOLO_ENABLE
