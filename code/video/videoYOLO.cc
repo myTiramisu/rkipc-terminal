@@ -1,12 +1,16 @@
 #include "videoYOLO.h"
+#include <yolov5.h>
+// osd
+#include "luckfox_osd.h"
+#include "luckfox_osd_draw.h"
 
-VideoYOLO::VideoYOLO(int pipeId, int viChannelId, int vencChannelId, int width, int height)
-: pipeId(pipeId), viChannelId(viChannelId),  vencChannelId(vencChannelId), video_width(width), video_height(height)
+VideoYOLO::VideoYOLO()
 {
-    // pipeId = 0;
-    // viChannelId = 2;
-    // video_width = 640;
-    // video_height = 640;
+    pipeId = 0;
+    viChannelId = 2;
+    video_width = 640;
+    video_height = 640;
+
     rgn_video_width = 2304;
     rgn_video_height = 1296;
 

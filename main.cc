@@ -1,11 +1,11 @@
-#include "videobase.h"	// video
 #include "videoRTSP.h"	// videoRTSP
 #include "videoYOLO.h"	// videoYOLO
 #include "videoLCD.h"	// videoLCD
 #include "display.h"	// lcd
-#include "videoLCD_factory.h"
-#include "videoRTSP_factory.h"
-#include "videoYOLO_factory.h"
+#include "video_factory.h"
+#include "displayFactory.h"
+#include "ledFactory.h"
+#include "ptzFactory.h"
 #include "led.h"		// led
 #include "pantilt.h"	// pantilt
 #include "log.h"		// log
@@ -18,15 +18,15 @@
 #include <atomic>
 
 
-#define ONVIF_SERVER_ENABLE 	0
+#define ONVIF_SERVER_ENABLE 	1
 
-#define LED_ENABLE 				0
-#define PTZ_ENABLE 				0
-#define DISPLAY_ENABLE 			0
+#define LED_ENABLE 				1
+#define PTZ_ENABLE 				1
+#define DISPLAY_ENABLE 			1
 
-#define VIDEORTSP_ENABLE 		0
-#define VIDEODISPLAY_ENABLE 	0
-#define VIDEOYOLO_ENABLE 		0
+#define VIDEORTSP_ENABLE 		1
+#define VIDEODISPLAY_ENABLE 	1
+#define VIDEOYOLO_ENABLE 		1
 
 #define UART_ENABLE 			0
 #define TCP_SERVER_ENABLE 		0
@@ -48,6 +48,9 @@ int main(int argc, char *argv[])
 {
   	system("RkLunch-stop.sh");
 	
+	// 初始化基类工厂指针
+	AbstractFactory* factory = nullptr;
+
 	// // 初始化参数
     // if (rk_param_init(ini_path) != 0) {
     //     LOG_ERROR("Failed to initialize parameters\n");
@@ -71,46 +74,59 @@ int main(int argc, char *argv[])
 #if LED_ENABLE
 	// LED模块
 	LOG_INFO("led Module init\n");
-	std::unique_ptr<Module> led0 = DeviceFactory::createLedDevice(LED0);
-	std::unique_ptr<Module> led1 = DeviceFactory::createLedDevice(LED1);
-	std::unique_ptr<Module> led2 = DeviceFactory::createLedDevice(LED2);
+	factory = new LedFactory();
+	ModuleParams LEDParam;
+	// led0
+	LEDParam.pin = LED0;
+	AbstractModule* led0 = factory->createModule(LEDParam);
+	LEDParam.pin = LED1;
+	AbstractModule* led1 = factory->createModule(LEDParam);
+	LEDParam.pin = LED2;
+	AbstractModule* led2 = factory->createModule(LEDParam);
 #endif
 
 #if PTZ_ENABLE
 	// 俯仰旋转控制
 	LOG_INFO("PTZ Module init\n");
-	std::unique_ptr<Module> ptz = DeviceFactory::createDevice("PTZ");
+	factory = new PtzFactory();
+	AbstractModule* ptz = factory->createModule();
 #endif
 
 #if DISPLAY_ENABLE
 	LOG_INFO("display Module init\n");
-	std::unique_ptr<Module> display = DeviceFactory::createDevice("DISPLAY");
+	factory = new DisplayFactory();
+	AbstractModule* display = factory->createModule();
 #endif
 
 #if VIDEORTSP_ENABLE
 	LOG_INFO("VideoRTSP Module init\n");
-	VideoFactory* videoRtspFactory = new VideoRTSPFactory();
-	VideoBase* videoRtsp = videoRtspFactory->createVideo(0, 0, 0, 2304, 1296);
-	
+	factory = new VideoRTSPFactory();
+	AbstractModule* videoRTSP = factory->createModule();
 #endif
 
 #if VIDEODISPLAY_ENABLE
 	LOG_INFO("VideoDipplay Module init\n");	
-	VideoFactory* videoDiaplayFactory = new VideoLCDFactory();
-	VideoBase* videoDiaplsy = videoDiaplayFactory->createVideo(0, 1, 1, 720, 480);
+	factory = new VideoDisplayFactory();
+	AbstractModule* videoDisplay = factory->createModule();
 #endif
 
 #if VIDEOYOLO_ENABLE
 	LOG_INFO("VideoYOLO Module init\n");
-	VideoFactory* videoYoloFactory = new VideoYOLOFactory();
-	VideoBase* videoYolo = videoYoloFactory->createVideo(0, 2, 2, 640, 640);
-	// controllor->addObserver(videoYolo);
+	factory = new VideoYOLOFactory();
+	AbstractModule* videoYOLO = factory->createModule();
 #endif
 
 #if VIDEODISPLAY_ENABLE && DISPLAY_ENABLE
 	LOG_INFO("videoDisplay connect to display\n");
 	// 使用lambda表达式连接信号与槽
-	videoDiaplsy->video_frame_signal.connect(dynamic_cast<Display*>(display.get()), &Display::push_frame);
+	dynamic_cast<VideoLCD*>(videoDisplay)->video_frame_signal.connect(
+    [display](const cv::Mat& frame) {
+        dynamic_cast<Display*>(display)->push_frame(frame);
+    }
+	);
+	// 使用lambda表达式连接信号与槽
+	// dynamic_cast<VideoLCD*>(videoDisplay)->video_frame_signal.connect(dynamic_cast<Display*>(display.get()), &Display::push_frame);
+	// videoDisplay->video_frame_signal.connect(dynamic_cast<Display*>(display.get()), &Display::push_frame);
 #endif
 	
 #if UART_ENABLE
@@ -139,25 +155,38 @@ int main(int argc, char *argv[])
  	LOG_INFO("Program starting exited\n");
 
 try {
+	#if LED_ENABLE
+		delete led0;
+		led0 = nullptr;
+		delete led1;
+		led1 = nullptr;
+		delete led2;
+		led2 = nullptr;
+	#endif
+
+	#if PTZ_ENABLE
+		delete ptz;
+		ptz = nullptr;
+	#endif
+
+	#if DISPLAY_ENABLE
+		delete display;
+		display = nullptr;
+	#endif			
+
 	#if VIDEORTSP_ENABLE
-		delete videoRtsp;
-		videoRtsp = nullptr;
-		delete videoRtspFactory;
-		videoRtspFactory = nullptr;
+		delete videoRTSP;
+		videoRTSP = nullptr;
 	#endif
 
 	#if VIDEODISPLAY_ENABLE
-		delete videoDiaplsy;
-		videoDiaplsy = nullptr;
-		delete videoDiaplayFactory;
-		videoDiaplayFactory = nullptr;
+		delete videoDisplay;
+		videoDisplay = nullptr;
 	#endif
 
 	#if VIDEOYOLO_ENABLE
-		delete videoYolo;
-		videoYolo = nullptr;
-		delete videoYoloFactory;
-		videoYoloFactory = nullptr;
+		delete videoYOLO;
+		videoYOLO = nullptr;
 	#endif
 
 	#if CONTROLLER_ENABLE
@@ -174,6 +203,11 @@ try {
 		delete tcpServer;
 		tcpServer = nullptr;
 	#endif
+
+	if(factory) {
+		delete factory;
+		factory = nullptr;
+	}
 
 	} catch (std::exception &e) {
         LOG_ERROR("Exception: %s\n", e.what());

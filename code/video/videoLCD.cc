@@ -1,12 +1,11 @@
 #include "videoLCD.h"
-VideoLCD::VideoLCD(int pipeId, int viChannelId, int vencChannelId, int width, int height)
-: pipeId(pipeId), viChannelId(viChannelId), vencChannelId(vencChannelId),video_width(width), video_height(height)
+VideoLCD::VideoLCD()
 {
-    // pipeId = 0;
-    // viChannelId = 1;
-    // vencChannelId = 1;
-    // video_width = 720;
-    // video_height = 480;
+    pipeId = 0;
+    viChannelId = 1;
+    vencChannelId = 1;
+    video_width = 720;
+    video_height = 480;
 
     quit_flag = false;
     video_thread = new std::thread(&VideoLCD::video_thread_func, this);

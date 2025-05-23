@@ -6,7 +6,7 @@
 
 class LedFactory : public AbstractFactory {
 public:
-    AbstractModule* createModule() const override {
-        return new Led(LED0);
+    AbstractModule* createModule(const ModuleParams& params = {}) const override {
+        return new Led(params.pin);
     }
 };

@@ -1,13 +1,17 @@
 #include "videoRTSP.h"
-
-VideoRTSP::VideoRTSP(int pipeId, int viChannelId, int vencChannelId, int width, int height)
-: pipeId(pipeId), viChannelId(viChannelId), vencChannelId(vencChannelId), video_width(width), video_height(height)
+extern "C" {
+    #include "rtsp.h"
+}
+// osd
+#include "luckfox_osd.h"
+#include "luckfox_osd_draw.h"
+VideoRTSP::VideoRTSP()
 {
-    // video_width  = 2304;
-    // video_height = 1296;
-    // pipeId = 0;            // pipeId
-    // viChannelId = 0;       // VI channel id
-    // vencChannelId = 0;     // VENC channel id
+    video_width  = 2304;
+    video_height = 1296;
+    pipeId = 0;            // pipeId
+    viChannelId = 0;       // VI channel id
+    vencChannelId = 0;     // VENC channel id
 
     quit_flag = false;
     

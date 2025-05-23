@@ -2,22 +2,25 @@
 #pragma once
 
 #include <mutex>
-// #include "module.h"
 #include "signal_slot.h"
 #include "gpio.h"
 #include "abstractModule.h"
 
-// LED Resources
-enum Led_num {
-    LED0 = GPIO2_A0_d,
-    LED1 = GPIO2_A1_d,
-    LED2 = GPIO2_A2_d,
-};
+// // LED Resources
+// enum Led_num {
+//     LED0 = GPIO2_A0_d,
+//     LED1 = GPIO2_A1_d,
+//     LED2 = GPIO2_A2_d,
+// };
+
+#define LED0 GPIO2_A0_d
+#define LED1 GPIO2_A1_d
+#define LED2 GPIO2_A2_d
 
 class Led : public AbstractModule
 {
 public:
-    Led(enum Led_num led_num);
+    Led(enum Gpio_num led_num);
 
     ~Led();
 
@@ -38,14 +41,14 @@ public:
     void set_blink_frequency(int blink_frequency);
 
 private:
-    enum Led_num led_num_;  // LED 对应的 GPIO 号
+    enum Gpio_num m_led_num;
     
     // 用户配置参数
-    const char* mode_;      
-    int on_time_;          
-    int off_time_;         
-    int blink_frequency_;
+    const char* m_mode;      
+    int m_on_time;          
+    int m_off_time;         
+    int m_blink_frequency;
 
     // 互斥锁保护参数
-    std::mutex led_mutex_;
+    std::mutex m_led_mutex;
 };

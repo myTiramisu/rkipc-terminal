@@ -1,7 +1,15 @@
 #ifndef VIDEO_LCD_H
 #define VIDEO_LCD_H
 
-#include "videobase.h"
+#include "videoBase.h"
+extern "C" {
+    #include "rtsp.h"
+}
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+
+#include "signal_slot.h"
 
 class VideoLCD : public VideoBase
 {
@@ -13,21 +21,15 @@ protected:
     void videoEncode() override;
     void videoRtspTransmit() override;
 public:
-    VideoLCD(int pipeId, int viChannelId, int vencChannelId, int width, int height);
+    VideoLCD();
     ~VideoLCD();
-
+    // 发送摄像头数据帧信号
+    Signal<cv::Mat> video_frame_signal;
 private:
     bool quit_flag;
-    int pipeId ;
-    int viChannelId;
-    int vencChannelId;
-    int video_width;
-    int video_height;
     VIDEO_FRAME_INFO_S stViFrame;       // 视频帧信息结构体
     VENC_STREAM_S stFrame;              // 视频帧流结构体
     VIDEO_FRAME_INFO_S venc_frame;      // 编码帧结构体
 };
-
-
 
 #endif

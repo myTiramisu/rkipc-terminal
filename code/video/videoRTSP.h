@@ -1,6 +1,6 @@
 #ifndef VIDEORTSP_H
 #define VIDEORTSP_H
-#include "videobase.h"
+#include "videoBase.h"
 
 class VideoRTSP : public VideoBase
 {
@@ -11,7 +11,7 @@ protected:
  
 
 public:
-    VideoRTSP(int pipeId, int viChannelId, int vencChannelId, int width, int height);
+    VideoRTSP();
     ~VideoRTSP();
 
 private:
@@ -30,7 +30,5 @@ private:
     std::thread *video_thread;
     void video_thread_func();
 };
-
-
 
 #endif

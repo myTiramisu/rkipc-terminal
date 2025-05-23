@@ -1,11 +1,11 @@
 #ifndef VIDEOYOLO_H
 #define VIDEOYOLO_H
 
-#include "videobase.h"
+#include "videoBase.h"
 class VideoYOLO : public VideoBase
 {
 public:
-    VideoYOLO(int pipeId, int viChannelId, int vencChannelId, int width, int height);
+    VideoYOLO();
     ~VideoYOLO();
 
 protected:
