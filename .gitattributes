@@ -1,0 +1,7 @@
+# 将 .cpp 和 .hpp 文件识别为 C++
+*.cpp linguist-language=C++
+*.hpp linguist-language=C++
+*.h linguist-language=C++
+
+# 将 .c 和 .h 文件识别为 C
+*.c linguist-language=C
