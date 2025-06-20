@@ -71,11 +71,20 @@ int main(int argc, char *argv[])
 	// controllor->addObserver(videoRtsp);
 #endif
 
+#if TCP_SERVER_ENABLE
+	TcpServer* tcpServer = new TcpServer();
+	LOG_INFO("tcpServer Module init\n");
+#endif
+
+
 #if PTZ_ENABLE
 	// 俯仰旋转控制
 	LOG_INFO("PTZ Module init\n");
+	ModuleParams PTZParam;
+	PTZParam.publisher = tcpServer; // 发布者为tcpServer
+	PTZParam.name = "PTZ";
 	factory = new PtzFactory();
-	AbstractModule* ptz = factory->createModule();
+	AbstractModule* ptz = factory->createModule(PTZParam);
 #endif
 
 #if DISPLAY_ENABLE
@@ -120,10 +129,7 @@ int main(int argc, char *argv[])
 	LOG_INFO("uart Module init success\n");
 #endif
 
-#if TCP_SERVER_ENABLE
-	TcpServer* tcpServer = new TcpServer();
-	LOG_INFO("tcpServer Module init\n");
-#endif
+
 
 
 #if LED_ENABLE

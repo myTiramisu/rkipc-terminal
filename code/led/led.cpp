@@ -1,6 +1,7 @@
 #include "led.h"
 #include "log.h"
 #include "param.h"
+#include "thread"
 
 /**
  * @brief LED 类构造函数。
@@ -31,17 +32,60 @@ Led::Led(Publisher* publisher, const std::string& name, enum Gpio_num led_num)
     if (m_blink_frequency < 1 || m_blink_frequency > 3) {
         m_blink_frequency = 1;  // 设置为默认值
     }
+
+    // 确保 LED 初始状态为关闭
+    off();  
 }
 
 void Led::update(std::string msg) 
 {
     std::lock_guard<std::mutex> lock(m_led_mutex);
+    // 确保消息不为空
+    if(msg[0] == '\0') {
+        LOG_WARN("Received empty message for LED %d\n", m_led_num);
+        return;
+    }
+    // 确保消息格式正确，前三位为LED名称，后面跟着冒号和命令
+    if (msg.length() < 4 || msg[3] != ':' || msg.substr(0, 3) != m_name) {
+        return;
+    }
+
+    // 打印接收到的消息
     LOG_INFO("LED %d received message: %s\n", m_led_num, msg.c_str());
-    if (msg == "on") {
-        on();  // 打开 LED
-    } else if (msg == "off") {
-        off();  // 关闭 LED
-    } 
+    // 判断消息是否为本灯的控制命令
+    if (msg == m_name + ":on") {
+        LOG_INFO("%s received ON command\n", m_name.c_str());
+        on();
+    } else if (msg == m_name + ":off") {
+        LOG_INFO("%s received OFF command\n", m_name.c_str());
+        off();
+    }
+    else if (msg == m_name + ":toggle") {
+        LOG_INFO("%s received TOGGLE command\n", m_name.c_str());
+        toggle();
+    } else if (msg == m_name + ":blink") {
+        LOG_INFO("%s received BLINK command\n", m_name.c_str());
+        blink(5);  // 默认闪烁1秒 ,闪烁5下
+    } else if (msg == m_name + ":set_mode:schedule") {
+        set_mode("schedule");
+        LOG_INFO("%s set to SCHEDULE mode\n", m_name.c_str());
+    } else if (msg == m_name + ":set_mode:manual") {
+        set_mode("manual");
+        LOG_INFO("%s set to MANUAL mode\n", m_name.c_str());
+    }
+    else if (msg == m_name + ":set_on_time") {
+        set_on_time(1000);  // 设置点亮时间为1000毫秒
+        LOG_INFO("%s set ON time to %d ms\n", m_name.c_str(), m_on_time);
+    } else if (msg == m_name + ":set_off_time") {
+        set_off_time(500);  // 设置熄灭时间为500毫秒
+        LOG_INFO("%s set OFF time to %d ms\n", m_name.c_str(), m_off_time);
+    } else if (msg == m_name + ":set_blink_frequency") {
+        set_blink_frequency(2);  // 设置闪烁频率为2Hz
+        LOG_INFO("%s set blink frequency to %d Hz\n", m_name.c_str(), m_blink_frequency);
+    }
+    else {
+        LOG_WARN("LED %d received unknown command: %s\n", m_led_num, msg.c_str());
+    }
 }
 
 /**
@@ -81,25 +125,22 @@ void Led::toggle() {
  * @param duration_s 闪烁持续时间（秒）。
  */
 void Led::blink(int duration_s) {
-    std::lock_guard<std::mutex> lock(m_led_mutex);
 
-    // 确保 blink_frequency_ 在合理范围内
-    if (m_blink_frequency < 1 || m_blink_frequency > 3) {
-        m_blink_frequency = 1;
-    }
+    // 启动一个新线程执行闪烁
+    std::thread([=]() {
+        int freq = m_blink_frequency;
+        if (freq < 1 || freq > 3) freq = 1;
+        int dur = duration_s;
+        if (dur <= 0 || dur > 5) dur = 1;
 
-    // 限制 duration_s 在 1 到 5 秒之间
-    if (duration_s <= 0 || duration_s > 5) {
-        duration_s = 1;
-    }
-
-    int blink_num = duration_s * m_blink_frequency;
-    while (blink_num--) {
-        on();
-        usleep(500000 / m_blink_frequency);
-        off();
-        usleep(500000 / m_blink_frequency);
-    }
+        int blink_num = dur * freq;
+        while (blink_num--) {
+            on();
+            usleep(500000 / freq);
+            off();
+            usleep(500000 / freq);
+        } 
+    }).detach();    // 使用互斥锁保护 LED 状态
 }
 
 /**

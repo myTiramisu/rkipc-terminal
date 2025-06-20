@@ -12,10 +12,10 @@ extern "C" {
     #include "pwm.h"
 }
 
-class Pantilt : public AbstractModule 
+class Pantilt : public AbstractModule, public Observer
 {
 public:
-    Pantilt();
+    Pantilt(Publisher* publisher, const std::string& name);
     ~Pantilt();
 
     void up(int step);
@@ -31,6 +31,8 @@ public:
     void reset();
     
 private:
+    void update(std::string msg) override;
+    // 
     // 当前Pan角度，范围：-180°~180°，角度大于0表示向左，小于0表示向右
     int pan_angle = 0;
     // 当前Tilt角度，范围：-45°~90°，角度大于0表示俯视，小于0表示仰视

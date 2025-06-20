@@ -7,6 +7,6 @@
 class PtzFactory : public AbstractFactory {
 public:
     AbstractModule* createModule(const ModuleParams& params = {}) const override {
-        return new Pantilt();
+        return new Pantilt(params.publisher, params.name);
     }
 };

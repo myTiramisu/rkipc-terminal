@@ -3,7 +3,9 @@
 /**
  * @brief Pantilt 类构造函数。
  */
-Pantilt::Pantilt() {
+Pantilt::Pantilt(Publisher* publisher, const std::string& name):
+    Observer(publisher, name)
+{
     // 初始化 PWM8 和 PWM9
     pwm_init(PWM8_M1);                      // 用于控制俯仰的180°舵机
     pwm_set_period(PWM8_M1, 20000000);      // 设置 PWM8 周期为 20ms
@@ -62,6 +64,30 @@ Pantilt::~Pantilt() {
 
     LOG_DEBUG("Pantilt module deinitialized\n");
 }
+
+void Pantilt::update(string msg)
+{
+    LOG_DEBUG("Pantilt received message: %s\n", msg.c_str());
+    // 解析消息并执行相应操作
+    if (msg == "PTZ:reset") {
+        reset();
+    } else if (msg == "PTZ:up") {
+        up(tilt_step_limit);
+    } else if (msg == "PTZ:down") {
+        down(tilt_step_limit);
+    } else if (msg == "PTZ:left") {
+        left(pan_step_limit);
+    } else if (msg == "PTZ:right") {
+        right(pan_step_limit);
+    } else if (msg.find("PTZ:ajust:") == 0) {
+        // 解析调整角度的消息
+        int delta_pan = std::stoi(msg.substr(15, 3));
+        int delta_tilt = std::stoi(msg.substr(19, 3));
+        onAjustPantilt(delta_pan, delta_tilt);
+    }
+}
+
+
 
 /**
  * @brief 俯仰角上抬。

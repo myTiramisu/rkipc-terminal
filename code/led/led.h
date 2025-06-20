@@ -21,7 +21,7 @@
 class Led : public AbstractModule, public Observer
 {
 public:
-     Led(Publisher* publisher, const std::string& name, enum Gpio_num led_num);
+    Led(Publisher* publisher, const std::string& name, enum Gpio_num led_num);
 
     ~Led();
 
