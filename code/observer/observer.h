@@ -1,35 +1,29 @@
 #ifndef __OBSERVER_H__
-#define __OBERVER_H__
+#define __OBSERVER_H__
 
-#include "publisher.h"
 #include <string>
+#include "publisher.h"
 #include "log.h"
 
-
+// 前向声明，避免循环依赖
+class Publisher;
 
 // 抽象观察者类
 class Observer {
 public:
     // 和发布者进行关联 - 通过构造函数实现 - 初始化列表
-    Observer(Publisher* publisher, std::string name) : m_publisher(publisher), m_name(name) {
-        m_publisher->attach(this);
-    }
-
+    Observer(Publisher* publisher, std::string name);
+    virtual ~Observer();
 
     // 和发布者进行解除关联 - 取消订阅
-    void unsubscribe() {
-        m_publisher->detach(this);
-    }
+    void unsubscribe();
+
     // 更新消息
     virtual void update(std::string msg) = 0;
 
-    virtual ~Observer() {
-        std::cout << "Observer " << m_name << " is destroyed" << std::endl;
-    }
-
 protected:
     Publisher* m_publisher;     // 订阅的的发布者
-    string m_name;              // 当前观察者的名字
+    std::string m_name;         // 当前观察者的名字
 };
 
 

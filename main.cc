@@ -29,7 +29,7 @@
 #define VIDEOYOLO_ENABLE 		1
 
 #define UART_ENABLE 			0
-#define TCP_SERVER_ENABLE 		0
+#define TCP_SERVER_ENABLE 		1
 
 
 char ini_path[] = "rkipc.ini";
@@ -71,20 +71,6 @@ int main(int argc, char *argv[])
 	// controllor->addObserver(videoRtsp);
 #endif
 
-#if LED_ENABLE
-	// LED模块
-	LOG_INFO("led Module init\n");
-	factory = new LedFactory();
-	ModuleParams LEDParam;
-	// led0
-	LEDParam.pin = LED0;
-	AbstractModule* led0 = factory->createModule(LEDParam);
-	LEDParam.pin = LED1;
-	AbstractModule* led1 = factory->createModule(LEDParam);
-	LEDParam.pin = LED2;
-	AbstractModule* led2 = factory->createModule(LEDParam);
-#endif
-
 #if PTZ_ENABLE
 	// 俯仰旋转控制
 	LOG_INFO("PTZ Module init\n");
@@ -105,7 +91,7 @@ int main(int argc, char *argv[])
 #endif
 
 #if VIDEODISPLAY_ENABLE
-	LOG_INFO("VideoDipplay Module init\n");	
+	LOG_INFO("VideoDisplay Module init\n");
 	factory = new VideoDisplayFactory();
 	AbstractModule* videoDisplay = factory->createModule();
 #endif
@@ -135,10 +121,28 @@ int main(int argc, char *argv[])
 #endif
 
 #if TCP_SERVER_ENABLE
-	TcpServer* tcpServer = new TcpServer(8888);
+	TcpServer* tcpServer = new TcpServer();
 	LOG_INFO("tcpServer Module init\n");
 #endif
 
+
+#if LED_ENABLE
+	// LED模块
+	LOG_INFO("led Module init\n");
+	factory = new LedFactory();
+	ModuleParams LEDParam;
+	LEDParam.publisher = tcpServer; // 发布者为tcpServer
+	// led0
+	LEDParam.pin = LED0;
+	LEDParam.name = "LED0";
+	AbstractModule* led0 = factory->createModule(LEDParam);
+	LEDParam.pin = LED1;
+	LEDParam.name = "LED1";
+	AbstractModule* led1 = factory->createModule(LEDParam);
+	LEDParam.pin = LED2;
+	LEDParam.name = "LED2";
+	AbstractModule* led2 = factory->createModule(LEDParam);
+#endif
 
 #if UART_ENABLE && TCP_SERVER_ENABLE
 	// 绑定tcp数据到串口发送

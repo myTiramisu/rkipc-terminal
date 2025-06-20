@@ -7,7 +7,9 @@
  * 
  * @param led_num LED 编号。
  */
-Led::Led(enum Gpio_num led_num) : m_led_num(led_num), m_on_time(0), m_off_time(0), m_blink_frequency(1), m_mode("manual") 
+Led::Led(Publisher* publisher, const std::string& name, enum Gpio_num led_num)
+    : Observer(publisher, name), 
+    m_led_num(led_num), m_on_time(0), m_off_time(0), m_blink_frequency(1), m_mode("manual")
 {
     // 初始化 GPIO
     if (gpio_init((Gpio_num)m_led_num, GPIO_OUTPUT) == -1) {
@@ -30,6 +32,18 @@ Led::Led(enum Gpio_num led_num) : m_led_num(led_num), m_on_time(0), m_off_time(0
         m_blink_frequency = 1;  // 设置为默认值
     }
 }
+
+void Led::update(std::string msg) 
+{
+    std::lock_guard<std::mutex> lock(m_led_mutex);
+    LOG_INFO("LED %d received message: %s\n", m_led_num, msg.c_str());
+    if (msg == "on") {
+        on();  // 打开 LED
+    } else if (msg == "off") {
+        off();  // 关闭 LED
+    } 
+}
+
 /**
  * @brief LED 类析构函数。
  */

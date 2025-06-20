@@ -1,7 +1,7 @@
 #include "server.h"
 #include "log.h"
 
-TcpServer::TcpServer(int port) {
+TcpServer::TcpServer() {
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket < 0) {
         LOG_ERROR("Error opening socket\n");
@@ -15,7 +15,7 @@ TcpServer::TcpServer(int port) {
     memset((char *)&serverAddr, 0, sizeof(serverAddr));
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_addr.s_addr = INADDR_ANY;
-    serverAddr.sin_port = htons(port);
+    serverAddr.sin_port = htons(PORT);
 
     if (bind(serverSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr)) < 0) {
         LOG_ERROR("Error on binding\n");
@@ -98,8 +98,13 @@ void TcpServer::client_handler(int clientSocket) {
         }
 
         LOG_INFO("Received message from client:%s\n", buffer);
+
+        // 发送消息到所有观察者
+        std::lock_guard<std::mutex> lock(mutex);
+        notify(std::string(buffer));
+
         // 发送服务器接收到客户端的信号
-        server_signal.emit(buffer);
+        // server_signal.emit(buffer);
     }
     close(clientSocket);
 }
@@ -114,5 +119,16 @@ void TcpServer::send_msg(const std::string& msg)
                 write(clientSocket, msg.c_str(), msg.length());
             }
         }
+    }
+}
+
+void TcpServer::notify(std::string msg)
+{
+    cout << "TcpServer observer num:" << m_observers.size() <<endl;
+
+    for(const auto &observer : m_observers)
+    {
+        // 观察者更新数据
+        observer->update(msg);
     }
 }

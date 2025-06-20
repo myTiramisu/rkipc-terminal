@@ -16,10 +16,14 @@
 #include <atomic>
 #include <string.h>
 #include "signal_slot.h"
+#include "publisher.h"  
 
-class TcpServer {
+#define PORT 8888
+
+class TcpServer : public Publisher
+{
 public:
-    TcpServer(int port);
+    TcpServer();
     ~TcpServer();
 
     void stop();
@@ -47,6 +51,8 @@ private:
 
     void server_thread_func();
     void client_handler(int clientSocket);
+
+    void notify(std::string msg) override;
 };
 
 #endif

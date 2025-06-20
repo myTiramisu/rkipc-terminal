@@ -5,6 +5,7 @@
 #include "signal_slot.h"
 #include "gpio.h"
 #include "abstractModule.h"
+#include "observer.h"
 
 // // LED Resources
 // enum Led_num {
@@ -17,10 +18,10 @@
 #define LED1 GPIO2_A1_d
 #define LED2 GPIO2_A2_d
 
-class Led : public AbstractModule
+class Led : public AbstractModule, public Observer
 {
 public:
-    Led(enum Gpio_num led_num);
+     Led(Publisher* publisher, const std::string& name, enum Gpio_num led_num);
 
     ~Led();
 
@@ -42,12 +43,14 @@ public:
 
 private:
     enum Gpio_num m_led_num;
-    
     // 用户配置参数
     const char* m_mode;      
     int m_on_time;          
     int m_off_time;         
     int m_blink_frequency;
+
+    void update(string msg) override;
+
 
     // 互斥锁保护参数
     std::mutex m_led_mutex;

@@ -1,6 +1,9 @@
 #pragma once
 
 #include "gpio.h"
+#include "publisher.h"
+#include "observer.h"
+#include "string"
 
 using namespace std;
 
@@ -13,6 +16,8 @@ struct VideoParams {
 };
 
 struct ModuleParams {
+    Publisher* publisher;
+    std::string name;
     Gpio_num pin;                       
     struct VideoParams videoparams;        
 };

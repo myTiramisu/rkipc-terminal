@@ -31,79 +31,61 @@ protected:
 };
 
 
-Publisher::Publisher()
-{
 
-}
+// // 发布者子类1
+// class Publisher1 : public Publisher
+// {
+// public:
+//     Publisher1();
+//     ~Publisher1() {}
 
-// 1. 添加订阅者
-void Publisher::attach(Observer* observer) {
-    m_observers.push_back(observer);
-}
+//     void notify(string msg) override;
+// };
 
-// 2. 删除订阅者
-void Publisher::detach(Observer* observer) {
-    // 删除
-    m_observers.remove(observer);
-}
+// // 发布者子类2
+// class Publisher2 : public Publisher
+// {
+// public:
+//     Publisher2();
+//     ~Publisher2() {}
 
-
-
-
-// 发布者子类1
-class Publisher1 : public Publisher
-{
-public:
-    Publisher1();
-    ~Publisher1() {}
-
-    void notify(string msg) override;
-};
-
-// 发布者子类2
-class Publisher2 : public Publisher
-{
-public:
-    Publisher2();
-    ~Publisher2() {}
-
-    void notify(string msg) override;
-};
+//     void notify(string msg) override;
+// };
 
 
 
 
-Publisher1::Publisher1()
-{
+// Publisher1::Publisher1()
+// {
 
-}
+// }
 
-Publisher2::Publisher2()
-{
+// Publisher2::Publisher2()
+// {
     
-}
+// }
 
-void Publisher1::notify(string msg)
-{
-    cout << "Publisher1 observer num:" << m_observers.size() <<endl;
+// void Publisher1::notify(string msg)
+// {
+//     cout << "Publisher1 observer num:" << m_observers.size() <<endl`;
 
-    for(const auto &observer : m_observers)
-    {
-        // 观察者更新数据
-        observer->update(msg);
-    }
-}
+//     for(const auto &observer : m_observers)
+//     {
+//         // 观察者更新数据
+//         observer->update(msg);
+//     }
+// }
 
 
-void Publisher2::notify(string msg)
-{
-    cout << "Publisher2 observer num:" << m_observers.size() <<endl;
+// void Publisher2::notify(string msg)
+// {
+//     cout << "Publisher2 observer num:" << m_observers.size() <<endl;
 
-    for(const auto &observer : m_observers)
-    {
-        // 观察者更新数据
-        observer->update(msg);
-    }
-}
+//     for(const auto &observer : m_observers)
+//     {
+//         // 观察者更新数据
+//         observer->update(msg);
+//     }
+// }
 
 #endif
