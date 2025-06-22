@@ -18,7 +18,7 @@
 #include <atomic>
 
 
-#define ONVIF_SERVER_ENABLE 	1
+#define ONVIF_SERVER_ENABLE 	0
 
 #define LED_ENABLE 				1
 #define PTZ_ENABLE 				1
@@ -160,6 +160,7 @@ int main(int argc, char *argv[])
   	while(!g_quit)
 	{	
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));	// 休眠500ms
+		// LOG_INFO("hello wordld\n");
 	}
 
  	LOG_INFO("Program starting exited\n");

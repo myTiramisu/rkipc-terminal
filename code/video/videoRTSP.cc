@@ -1,4 +1,6 @@
 #include "videoRTSP.h"
+#include "log.h"        // log
+
 extern "C" {
     #include "rtsp.h"
 }
@@ -21,6 +23,7 @@ VideoRTSP::VideoRTSP()
     vi_dev_init();
     rtsp_init();
     
+    LOG_DEBUG("************************VideoRTSP init success\n");
     video_thread = new std::thread(&VideoRTSP::video_thread_func, this);
 }
 

@@ -45,10 +45,10 @@ void Led::update(std::string msg)
         LOG_WARN("Received empty message for LED %d\n", m_led_num);
         return;
     }
-    // 确保消息格式正确，前三位为LED名称，后面跟着冒号和命令
-    if (msg.length() < 4 || msg[3] != ':' || msg.substr(0, 3) != m_name) {
-        return;
-    }
+    // // 确保消息格式正确，前三位为LED名称，后面跟着冒号和命令
+    // if (msg.length() < 4 || msg[3] != ':' || msg.substr(0, 3) != m_name) {
+    //     return;
+    // }
 
     // 打印接收到的消息
     LOG_INFO("LED %d received message: %s\n", m_led_num, msg.c_str());

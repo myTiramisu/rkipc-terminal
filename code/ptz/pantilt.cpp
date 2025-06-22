@@ -67,7 +67,14 @@ Pantilt::~Pantilt() {
 
 void Pantilt::update(string msg)
 {
-    LOG_DEBUG("Pantilt received message: %s\n", msg.c_str());
+    if(msg.empty()) {
+        LOG_ERROR("Received empty message\n");
+        return;
+    }
+
+    // if(msg.size() < 5 || msg.substr(0, 4) != "PTZ:")    return;
+ 
+    LOG_DEBUG("PTZ received message: %s\n", msg.c_str());
     // 解析消息并执行相应操作
     if (msg == "PTZ:reset") {
         reset();
