@@ -2,6 +2,8 @@
 #define VIDEO_LCD_H
 
 #include "videoBase.h"
+#include "abstractModule.h"
+
 extern "C" {
     #include "rtsp.h"
 }
@@ -20,8 +22,11 @@ protected:
     void videoCapture() override;
     void videoEncode() override;
     void videoRtspTransmit() override;
+
+    void notify(string msg) override;
+    void update(Publisher* publisher, string msg) override;
 public:
-    VideoLCD();
+    VideoLCD(ModuleParams params);
     ~VideoLCD();
     // 发送摄像头数据帧信号
     Signal<cv::Mat> video_frame_signal;
@@ -30,6 +35,8 @@ private:
     VIDEO_FRAME_INFO_S stViFrame;       // 视频帧信息结构体
     VENC_STREAM_S stFrame;              // 视频帧流结构体
     VIDEO_FRAME_INFO_S venc_frame;      // 编码帧结构体
+
+
 };
 
 #endif

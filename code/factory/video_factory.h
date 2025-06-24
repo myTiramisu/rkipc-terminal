@@ -8,27 +8,27 @@
 #include "videoLCD.h"
 #include "videoYOLO.h"
 
-class VideoRTSPFactory: public AbstractFactory{
+class VideoRTSPFactory: public BaseFactory{
 public:
-    AbstractModule* createModule(const ModuleParams& params = {}) const override {
-        return new VideoRTSP();
+    BaseModule* createModule(const ModuleParams& params = {}) const override {
+        return new VideoRTSP(params);
     }
     virtual ~VideoRTSPFactory() {}
 };
 
 
-class VideoDisplayFactory:  public AbstractFactory{
+class VideoDisplayFactory:  public BaseFactory{
 public:
-    AbstractModule* createModule(const ModuleParams& params = {}) const override {
-        return new VideoLCD();
+    BaseModule* createModule(const ModuleParams& params = {}) const override {
+        return new VideoLCD(params);
     }
     virtual ~VideoDisplayFactory() {}
 };
 
-class VideoYOLOFactory:  public AbstractFactory{
+class VideoYOLOFactory:  public BaseFactory{
 public:
-    AbstractModule* createModule(const ModuleParams& params = {}) const override {
-        return new VideoYOLO();
+    BaseModule* createModule(const ModuleParams& params = {}) const override {
+        return new VideoYOLO(params);
     }
     virtual ~VideoYOLOFactory() {}
 };

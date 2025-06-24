@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
   	system("RkLunch-stop.sh");
 	
 	// 初始化基类工厂指针
-	AbstractFactory* factory = nullptr;
+	BaseFactory* factory = nullptr;
 
 	// // 初始化参数
     // if (rk_param_init(ini_path) != 0) {
@@ -72,7 +72,9 @@ int main(int argc, char *argv[])
 #endif
 
 #if TCP_SERVER_ENABLE
-	TcpServer* tcpServer = new TcpServer();
+	ModuleParams TcpParam;
+	TcpParam.name = "TcpServer";
+	TcpServer* tcpServer = new TcpServer(TcpParam);
 	LOG_INFO("tcpServer Module init\n");
 #endif
 
@@ -81,34 +83,34 @@ int main(int argc, char *argv[])
 	// 俯仰旋转控制
 	LOG_INFO("PTZ Module init\n");
 	ModuleParams PTZParam;
-	PTZParam.publisher = tcpServer; // 发布者为tcpServer
 	PTZParam.name = "PTZ";
 	factory = new PtzFactory();
-	AbstractModule* ptz = factory->createModule(PTZParam);
+	BaseModule* ptz = factory->createModule(PTZParam);
+	ptz->subscribe(tcpServer);
 #endif
 
 #if DISPLAY_ENABLE
 	LOG_INFO("display Module init\n");
 	factory = new DisplayFactory();
-	AbstractModule* display = factory->createModule();
+	BaseModule* display = factory->createModule();
 #endif
 
 #if VIDEORTSP_ENABLE
 	LOG_INFO("VideoRTSP Module init\n");
 	factory = new VideoRTSPFactory();
-	AbstractModule* videoRTSP = factory->createModule();
+	BaseModule* videoRTSP = factory->createModule();
 #endif
 
 #if VIDEODISPLAY_ENABLE
 	LOG_INFO("VideoDisplay Module init\n");
 	factory = new VideoDisplayFactory();
-	AbstractModule* videoDisplay = factory->createModule();
+	BaseModule* videoDisplay = factory->createModule();
 #endif
 
 #if VIDEOYOLO_ENABLE
 	LOG_INFO("VideoYOLO Module init\n");
 	factory = new VideoYOLOFactory();
-	AbstractModule* videoYOLO = factory->createModule();
+	BaseModule* videoYOLO = factory->createModule();
 #endif
 
 #if VIDEODISPLAY_ENABLE && DISPLAY_ENABLE
@@ -137,17 +139,21 @@ int main(int argc, char *argv[])
 	LOG_INFO("led Module init\n");
 	factory = new LedFactory();
 	ModuleParams LEDParam;
-	LEDParam.publisher = tcpServer; // 发布者为tcpServer
 	// led0
 	LEDParam.pin = LED0;
 	LEDParam.name = "LED0";
-	AbstractModule* led0 = factory->createModule(LEDParam);
+	BaseModule* led0 = factory->createModule(LEDParam);
+	led0->subscribe(tcpServer);
+
 	LEDParam.pin = LED1;
 	LEDParam.name = "LED1";
-	AbstractModule* led1 = factory->createModule(LEDParam);
+	BaseModule* led1 = factory->createModule(LEDParam);
+	led1->subscribe(tcpServer);
+
 	LEDParam.pin = LED2;
 	LEDParam.name = "LED2";
-	AbstractModule* led2 = factory->createModule(LEDParam);
+	BaseModule* led2 = factory->createModule(LEDParam);
+	led2->subscribe(tcpServer);
 #endif
 
 #if UART_ENABLE && TCP_SERVER_ENABLE

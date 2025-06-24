@@ -10,14 +10,19 @@
 // #include "module.h"
 #include "abstractModule.h"
 
-class Display : public AbstractModule
+class Display : public BaseModule
 {
 public:
-    Display();
+    Display(ModuleParams params);
     ~Display();
  
     void push_frame(const cv::Mat& frame);   // 接收帧并将其放入队列
     
+protected:
+    void notify(string msg) override;
+    void update(Publisher* publisher, string msg) override;
+    
+
 private:
     // 显示帧
     cv::Mat disp;     

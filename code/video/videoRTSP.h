@@ -11,8 +11,13 @@ protected:
  
 
 public:
-    VideoRTSP();
+    VideoRTSP(ModuleParams params);
     ~VideoRTSP();
+
+
+protected:
+    void notify(string msg) override;
+    void update(Publisher* publisher, string msg) override;
 
 private:
     int video_width  = 2304;

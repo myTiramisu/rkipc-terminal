@@ -4,7 +4,7 @@
 #include "luckfox_osd.h"
 #include "luckfox_osd_draw.h"
 
-VideoYOLO::VideoYOLO()
+VideoYOLO::VideoYOLO(ModuleParams params):VideoBase(params)
 {
     pipeId = 0;
     viChannelId = 2;
@@ -25,6 +25,16 @@ VideoYOLO::~VideoYOLO()
         video_thread->join();
     delete video_thread;
     LOG_DEBUG("******************************VideoLCD exit\n");
+}
+
+
+void VideoYOLO::notify(std::string msg)
+{
+
+}
+void VideoYOLO::update(Publisher* publisher, string msg)
+{
+
 }
 
 void VideoYOLO::videoCapture() 

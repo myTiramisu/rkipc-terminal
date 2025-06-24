@@ -1,11 +1,11 @@
 #include "server.h"
 #include "log.h"
 
-TcpServer::TcpServer() {
+TcpServer::TcpServer(ModuleParams params): BaseModule(params) {
     serverSocket = socket(AF_INET, SOCK_STREAM, 0);
     if (serverSocket < 0) {
         LOG_ERROR("Error opening socket\n");
-        exit(1);
+        exit(1); 
     }
 
     int optval = 1;
@@ -129,6 +129,12 @@ void TcpServer::notify(std::string msg)
     for(const auto &observer : m_observers)
     {
         // 观察者更新数据
-        observer->update(msg);
+        observer->update(this, msg);
     }
+}
+
+
+void TcpServer::update(Publisher* publisher, string msg)
+{
+
 }

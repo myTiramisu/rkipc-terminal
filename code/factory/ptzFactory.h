@@ -4,9 +4,9 @@
 #include "abstractModule.h"
 #include "pantilt.h"
 
-class PtzFactory : public AbstractFactory {
+class PtzFactory : public BaseFactory {
 public:
-    AbstractModule* createModule(const ModuleParams& params = {}) const override {
-        return new Pantilt(params.publisher, params.name);
+    BaseModule* createModule(const ModuleParams& params = {}) const override {
+        return new Pantilt(params);
     }
 };

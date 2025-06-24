@@ -4,9 +4,9 @@
 #include "abstractModule.h"
 #include "led.h"
 
-class LedFactory : public AbstractFactory {
+class LedFactory : public BaseFactory {
 public:
-    AbstractModule* createModule(const ModuleParams& params = {}) const override {
-        return new Led(params.publisher, params.name, params.pin);
+    BaseModule* createModule(const ModuleParams& params = {}) const override {
+        return new Led(params);
     }
 };

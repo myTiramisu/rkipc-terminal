@@ -7,7 +7,7 @@ extern "C" {
 // osd
 #include "luckfox_osd.h"
 #include "luckfox_osd_draw.h"
-VideoRTSP::VideoRTSP()
+VideoRTSP::VideoRTSP(ModuleParams params):VideoBase(params)
 {
     video_width  = 2304;
     video_height = 1296;
@@ -46,7 +46,14 @@ VideoRTSP::~VideoRTSP()
         free(stFrame.pstPack);
     }
 }
+void VideoRTSP::notify(std::string msg)
+{
 
+}
+void VideoRTSP::update(Publisher* publisher, string msg)
+{
+
+}
 
 void VideoRTSP::videoCapture() 
 {

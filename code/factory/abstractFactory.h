@@ -5,11 +5,11 @@
 
 using namespace std;
 
-class AbstractFactory
+class BaseFactory
 {
 public:
-    virtual ~AbstractFactory() = default;
-    virtual AbstractModule* createModule(const ModuleParams& params = {}) const = 0;
+    virtual ~BaseFactory() = default;
+    virtual BaseModule* createModule(const ModuleParams& params = {}) const = 0;
 private:
     
 };

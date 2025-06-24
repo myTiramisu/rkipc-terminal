@@ -1,5 +1,5 @@
 #include "videoLCD.h"
-VideoLCD::VideoLCD()
+VideoLCD::VideoLCD(ModuleParams params):VideoBase(params)
 {
     pipeId = 0;
     viChannelId = 1;
@@ -18,6 +18,18 @@ VideoLCD::~VideoLCD()
         video_thread->join();
     delete video_thread;
     LOG_DEBUG("******************************VideoLCD exit\n");
+}
+
+
+
+void VideoLCD::notify(std::string msg) 
+{
+
+}
+
+void VideoLCD::update(Publisher* publisher, string msg)
+{
+
 }
 
 

@@ -5,14 +5,19 @@
 class VideoYOLO : public VideoBase
 {
 public:
-    VideoYOLO();
+    VideoYOLO(ModuleParams params);
     ~VideoYOLO();
 
 protected:
+    // 观察者模式数据通信接口
+    void notify(string msg) override;
+    void update(Publisher* publisher, string msg) override;
+
+    // 摄像头采集
     void videoCapture() override;
     void videoEncode() override;
     void videoRtspTransmit() override;
-
+    
 private:
     int pipeId;
     int viChannelId;

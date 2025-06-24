@@ -7,7 +7,7 @@ extern "C" {
 #include "log.h"
 #include "abstractModule.h"
 
-class VideoBase: public AbstractModule
+class VideoBase: public BaseModule
 {
 protected:
     int pipeId;
@@ -21,7 +21,8 @@ protected:
     virtual void videoRtspTransmit() = 0;
 
 public:
-    VideoBase(){}
+    VideoBase(ModuleParams params):BaseModule(params){}
+
     virtual  ~VideoBase() {}
 
 

@@ -4,7 +4,6 @@
 #include <string>
 #include <vector>
 #include <list>
-#include <iostream>
 #include "observer.h"
 
 using namespace std;
@@ -22,70 +21,12 @@ public:
     void attach(Observer* observer);
     // 2. 删除订阅者
     void detach(Observer* observer);
-    // 3. 通知订阅者 
-    virtual void notify(string msg) = 0;    // 不同子类发送消息不一样，定义为存虚，要求必须重写notify函数
-
+    // 3. 通知订阅者 不同子类发送消息不一样，定义为存虚，要求必须重写notify函数
+    virtual void notify(string msg) = 0;    
+    
 protected:
     // 订阅者列表 添加删除效率高
     list<Observer*> m_observers;
 };
-
-
-
-// // 发布者子类1
-// class Publisher1 : public Publisher
-// {
-// public:
-//     Publisher1();
-//     ~Publisher1() {}
-
-//     void notify(string msg) override;
-// };
-
-// // 发布者子类2
-// class Publisher2 : public Publisher
-// {
-// public:
-//     Publisher2();
-//     ~Publisher2() {}
-
-//     void notify(string msg) override;
-// };
-
-
-
-
-// Publisher1::Publisher1()
-// {
-
-// }
-
-// Publisher2::Publisher2()
-// {
-    
-// }
-
-// void Publisher1::notify(string msg)
-// {
-//     cout << "Publisher1 observer num:" << m_observers.size() <<endl`;
-
-//     for(const auto &observer : m_observers)
-//     {
-//         // 观察者更新数据
-//         observer->update(msg);
-//     }
-// }
-
-
-// void Publisher2::notify(string msg)
-// {
-//     cout << "Publisher2 observer num:" << m_observers.size() <<endl;
-
-//     for(const auto &observer : m_observers)
-//     {
-//         // 观察者更新数据
-//         observer->update(msg);
-//     }
-// }
 
 #endif

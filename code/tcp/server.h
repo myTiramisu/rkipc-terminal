@@ -17,13 +17,15 @@
 #include <string.h>
 #include "signal_slot.h"
 #include "publisher.h"  
-
+#include "abstractModule.h"
 #define PORT 8888
 
-class TcpServer : public Publisher
+using namespace std;
+
+class TcpServer : public BaseModule
 {
 public:
-    TcpServer();
+    TcpServer(ModuleParams params = {});
     ~TcpServer();
 
     void stop();
@@ -53,6 +55,7 @@ private:
     void client_handler(int clientSocket);
 
     void notify(std::string msg) override;
+    void update(Publisher* publisher, string msg) override;
 };
 
 #endif

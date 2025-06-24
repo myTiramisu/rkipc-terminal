@@ -3,8 +3,7 @@
 /**
  * @brief Pantilt 类构造函数。
  */
-Pantilt::Pantilt(Publisher* publisher, const std::string& name):
-    Observer(publisher, name)
+Pantilt::Pantilt(ModuleParams params):BaseModule(params)
 {
     // 初始化 PWM8 和 PWM9
     pwm_init(PWM8_M1);                      // 用于控制俯仰的180°舵机
@@ -65,7 +64,7 @@ Pantilt::~Pantilt() {
     LOG_DEBUG("Pantilt module deinitialized\n");
 }
 
-void Pantilt::update(string msg)
+void Pantilt::update(Publisher* publisher, string msg)
 {
     if(msg.empty()) {
         LOG_ERROR("Received empty message\n");
@@ -94,8 +93,11 @@ void Pantilt::update(string msg)
     }
 }
 
+void Pantilt::notify(string msg)
+{
 
-
+}
+   
 /**
  * @brief 俯仰角上抬。
  */

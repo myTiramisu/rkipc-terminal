@@ -8,9 +8,9 @@
  * 
  * @param led_num LED 编号。
  */
-Led::Led(Publisher* publisher, const std::string& name, enum Gpio_num led_num)
-    : Observer(publisher, name), 
-    m_led_num(led_num), m_on_time(0), m_off_time(0), m_blink_frequency(1), m_mode("manual")
+Led::Led(ModuleParams params)
+    : BaseModule(params), 
+    m_led_num(params.pin), m_on_time(0), m_off_time(0), m_blink_frequency(1), m_mode("manual")
 {
     // 初始化 GPIO
     if (gpio_init((Gpio_num)m_led_num, GPIO_OUTPUT) == -1) {
@@ -37,7 +37,7 @@ Led::Led(Publisher* publisher, const std::string& name, enum Gpio_num led_num)
     off();  
 }
 
-void Led::update(std::string msg) 
+void Led::update(Publisher *publisher,::string msg) 
 {
     std::lock_guard<std::mutex> lock(m_led_mutex);
     // 确保消息不为空
@@ -86,6 +86,10 @@ void Led::update(std::string msg)
     else {
         LOG_WARN("LED %d received unknown command: %s\n", m_led_num, msg.c_str());
     }
+}
+void Led::notify(string msg)
+{
+
 }
 
 /**

@@ -4,8 +4,8 @@
 #include "publisher.h"
 #include "observer.h"
 #include "string"
-
-using namespace std;
+#include "observer.h"
+#include "publisher.h"
 
 struct VideoParams {
     int pipeId;
@@ -16,18 +16,26 @@ struct VideoParams {
 };
 
 struct ModuleParams {
-    Publisher* publisher;
     std::string name;
-    Gpio_num pin;                       
+    Gpio_num pin;                    
     struct VideoParams videoparams;        
 };
 
-
 // 既支持多产品族的统一接口，又允许单个产品族内部的灵活扩展
 // 抽象基类
-class AbstractModule
+class BaseModule:public Publisher, public Observer
 {
 public:
-    virtual ~AbstractModule() = default;
+    BaseModule(const ModuleParams& params)
+        : Publisher(), Observer(), m_params(params)
+    {
+        m_name = params.name;
+    }
+
+    virtual ~BaseModule() = default;
+
+protected:
+    ModuleParams m_params;
+    string m_name;
 };
 

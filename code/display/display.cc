@@ -5,7 +5,7 @@ extern "C" {
     #include "framebuffer.h"
 }
 
-Display::Display()
+Display::Display(const ModuleParams params): BaseModule(params)
 {
     if(init_framebuffer() < 0) {
         std::cout << "error initializing framebuffer" << std::endl;
@@ -49,6 +49,17 @@ Display::~Display()
     std::cout << "display quit success";
 
 }
+
+void Display::notify(string msg)
+{
+
+}
+void Display::update(Publisher* publisher, string msg)
+{
+    
+}
+
+
 
  // 接收帧并将其放入队列
 void Display::push_frame(const cv::Mat& frame)
