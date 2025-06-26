@@ -65,12 +65,6 @@ int main(int argc, char *argv[])
 	onvif_server_init();
 #endif
 
-#if CONTROLLER_ENABLE
-	LOG_INFO("controller Module init\n");
-	ControlCenter *controllor = new ControlCenter();
-	// controllor->addObserver(videoRtsp);
-#endif
-
 #if TCP_SERVER_ENABLE
 	ModuleParams TcpParam;
 	TcpParam.name = "TcpServer";
@@ -130,9 +124,6 @@ int main(int argc, char *argv[])
 	Uart* uart = new Uart(4);
 	LOG_INFO("uart Module init success\n");
 #endif
-
-
-
 
 #if LED_ENABLE
 	// LED模块
