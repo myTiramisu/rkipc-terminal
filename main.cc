@@ -119,11 +119,13 @@ int main(int argc, char *argv[])
 	// dynamic_cast<VideoLCD*>(videoDisplay)->video_frame_signal.connect(dynamic_cast<Display*>(display.get()), &Display::push_frame);
 	// videoDisplay->video_frame_signal.connect(dynamic_cast<Display*>(display.get()), &Display::push_frame);
 #endif
-	
-#if UART_ENABLE
-	Uart* uart = new Uart(4);
-	LOG_INFO("uart Module init success\n");
+
+#if VIDEODISPLAY_ENABLE && PTZ_ENABLE
+	LOG_INFO("videoYOLO connect to PTZ\n");
+	// dynamic_cast<VideoYOLO*>(videoYOLO)->signal_adjust_pantilt.connect(dynamic_cast<Pantilt*>(ptz), &Pantilt::onAjustPantilt);
 #endif
+
+
 
 #if LED_ENABLE
 	// LED模块

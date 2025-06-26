@@ -35,8 +35,6 @@ protected:
     void update(Publisher* publisher, string msg) override;
 
 private:
-
-    // 
     // 当前Pan角度，范围：-180°~180°，角度大于0表示向左，小于0表示向右
     int pan_angle = 0;
     // 当前Tilt角度，范围：-45°~90°，角度大于0表示俯视，小于0表示仰视
@@ -46,10 +44,10 @@ private:
     const int tilt_step_limit = 15;
     const int up_limit = -60;
     const int down_limit = 90;
-    // const int left_limit = -180; // 360度舵机
-    // const int right_limit = 180; // 360度舵机
-    const int left_limit = -90; // 180度舵机
-    const int right_limit = 90; // 180度舵机
+    const int left_limit = -180; // 360度舵机
+    const int right_limit = 180; // 360度舵机
+    // const int left_limit = -90; // 180度舵机
+    // const int right_limit = 90; // 180度舵机
     const int min_duty_cycle_ns = 500000;
     const int max_duty_cycle_ns = 2500000;
 

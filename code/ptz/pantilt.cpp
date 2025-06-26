@@ -85,11 +85,6 @@ void Pantilt::update(Publisher* publisher, string msg)
         left(pan_step_limit);
     } else if (msg == "PTZ:right") {
         right(pan_step_limit);
-    } else if (msg.find("PTZ:ajust:") == 0) {
-        // 解析调整角度的消息
-        int delta_pan = std::stoi(msg.substr(15, 3));
-        int delta_tilt = std::stoi(msg.substr(19, 3));
-        onAjustPantilt(delta_pan, delta_tilt);
     }
 }
 
@@ -223,51 +218,53 @@ void Pantilt::setTilt(int target_angle) {
     cv_home_position.notify_all();
 }
 
-// /**
-//  * @brief 设置旋转角度（360度舵机）。
-//  * 
-//  * @param target_angle 目标角度。
-//  */
-// void Pantilt::setPan(int target_angle) {
-//     // 限制目标角度在 -180 到 180 范围内
-//     if (target_angle < -180) {
-//         target_angle = -180;
-//     } else if (target_angle > 180) {
-//         target_angle = 180;
-//     }
+/**
+ * @brief 设置旋转角度（360度舵机）。
+ * 
+ * @param target_angle 目标角度。
+ */
+/*
+void Pantilt::setPan(int target_angle) {
+    // 限制目标角度在 -180 到 180 范围内
+    if (target_angle < -180) {
+        target_angle = -180;
+    } else if (target_angle > 180) {
+        target_angle = 180;
+    }
 
-//     unsigned int duty_cycle_ns;
-//     int angle_diff = target_angle - pan_angle;  // 计算目标角度与当前角度的差值
+    unsigned int duty_cycle_ns;
+    int angle_diff = target_angle - pan_angle;  // 计算目标角度与当前角度的差值
 
-//     // 根据角度差设置旋转方向
-//     if (angle_diff < 0) {  // 逆时针旋转
-//         duty_cycle_ns = 1000000;  // 对应逆时针旋转的 PWM 占空比
-//     } else if (angle_diff > 0) {  // 顺时针旋转
-//         duty_cycle_ns = 2000000;  // 对应顺时针旋转的 PWM 占空比
-//     } else {
-//         return;  // 角度相同，不需要旋转
-//     }
+    // 根据角度差设置旋转方向
+    if (angle_diff < 0) {  // 逆时针旋转
+        duty_cycle_ns = 1000000;  // 对应逆时针旋转的 PWM 占空比
+    } else if (angle_diff > 0) {  // 顺时针旋转
+        duty_cycle_ns = 2000000;  // 对应顺时针旋转的 PWM 占空比
+    } else {
+        return;  // 角度相同，不需要旋转
+    }
 
-//     // 计算需要旋转的时间，设定旋转速度大约为1.078秒一圈
-//     float rotation_time = (abs(angle_diff) / 360.0) * 1.078 * 1000000;  // us
+    // 计算需要旋转的时间，设定旋转速度大约为1.078秒一圈
+    float rotation_time = (abs(angle_diff) / 360.0) * 1.078 * 1000000;  // us
 
-//     // 设置 PWM 占空比，启用 PWM9
-//     pwm_set_duty_cycle(PWM9_M1, duty_cycle_ns);
+    // 设置 PWM 占空比，启用 PWM9
+    pwm_set_duty_cycle(PWM9_M1, duty_cycle_ns);
 
-//     // 让舵机旋转相应的时间
-//     usleep(rotation_time);  // 微秒级延时
+    // 让舵机旋转相应的时间
+    usleep(rotation_time);  // 微秒级延时
 
-//     // 停止旋转
-//     pwm_set_duty_cycle(PWM9_M1, 1500000);  // 设置为 1.5ms 停止旋转
-//     pan_angle = target_angle;
-// }
+    // 停止旋转
+    pwm_set_duty_cycle(PWM9_M1, 1500000);  // 设置为 1.5ms 停止旋转
+    pan_angle = target_angle;
+}
+*/
 
 /**
  * @brief 设置旋转角度（180度舵机）。
  * 
  * @param target_angle 目标角度。
  */
-void Pantilt::setPan(int target_angle) {
+ void Pantilt::setPan(int target_angle) {
     if (pan_angle == target_angle) return;  // 如果目标角度不变，跳过设置
 
     // 限制目标角度在 -90 到 90 范围内
@@ -285,6 +282,7 @@ void Pantilt::setPan(int target_angle) {
     has_operation = true;
     cv_home_position.notify_all();
 }
+
 
 /**
  * @brief 将角度映射为 PWM 占空比。

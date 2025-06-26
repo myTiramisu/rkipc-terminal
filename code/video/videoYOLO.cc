@@ -229,8 +229,8 @@ void VideoYOLO::video_thread_func()
                         float score = det_result->prop + square_coefficient * (float)target_area / (float)rgn_square_size;
                         float last_score = follow_target_prop + square_coefficient * (float)last_target_area/ (float)rgn_square_size;
 
-                        // LOG_DEBUG("target_prop: %.3f, target_area: %d, score: %.3f\n", det_result->prop, target_area, score);
-                        // LOG_DEBUG("last_target_prop: %.3f, last_target_area: %d, last_score: %.3f\n", follow_target_prop, last_target_area, last_score);
+                        LOG_DEBUG("target_prop: %.3f, target_area: %d, score: %.3f\n", det_result->prop, target_area, score);
+                        LOG_DEBUG("last_target_prop: %.3f, last_target_area: %d, last_score: %.3f\n", follow_target_prop, last_target_area, last_score);
 
                         // 如果当前目标的得分更高，选择当前目标
                         if (score > last_score)
@@ -287,9 +287,9 @@ void VideoYOLO::video_thread_func()
                 continue;
             }
 
-            // LOG_DEBUG("follow target: (%d, %d, %d, %d)\n", follow_sX, follow_sY, follow_eX, follow_eY);
-            // LOG_DEBUG("cx: %d, cy: %d\n", cx, cy);
-            // LOG_DEBUG("delta_x: %d, delta_y: %d\n", delta_x, delta_y);
+            LOG_DEBUG("follow target: (%d, %d, %d, %d)\n", follow_sX, follow_sY, follow_eX, follow_eY);
+            LOG_DEBUG("cx: %d, cy: %d\n", cx, cy);
+            LOG_DEBUG("delta_x: %d, delta_y: %d\n", delta_x, delta_y);
 
             // 根据偏移量计算云台需要调整的角度，基于画幅 左右 90°，俯仰 45°，加上系数微调
             float pan_coefficient = 0.3;
@@ -297,10 +297,10 @@ void VideoYOLO::video_thread_func()
             int delta_pan = (int)(pan_coefficient * (float)delta_x / (float)rgn_video_width * 90);
             int delta_tilt = (int)(tilt_coefficient * (float)delta_y / (float)rgn_video_height * 45);
 
-            // LOG_DEBUG("delta_pan: %d, delta_tilt: %d\n", delta_pan, delta_tilt);
+            LOG_DEBUG("delta_pan: %d, delta_tilt: %d\n", delta_pan, delta_tilt);
 
             // 发射信号来调整云台位置
-            // signal_adjust_pantilt.emit(delta_pan, delta_tilt);  // 传递偏移量给舵机控制类
+            signal_adjust_pantilt.emit(delta_pan, delta_tilt);  // 传递偏移量给舵机控制类
         }
     }
     vi_chn_deinit(pipeId, viChannelId);

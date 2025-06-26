@@ -2,12 +2,15 @@
 #define VIDEOYOLO_H
 
 #include "videoBase.h"
+#include "signal_slot.h"
+
 class VideoYOLO : public VideoBase
 {
 public:
     VideoYOLO(ModuleParams params);
     ~VideoYOLO();
 
+    Signal<int, int> signal_adjust_pantilt;
 protected:
     // 观察者模式数据通信接口
     void notify(string msg) override;
