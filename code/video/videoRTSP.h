@@ -28,8 +28,6 @@ private:
 
     VIDEO_FRAME_INFO_S stViFrame;   
     VENC_STREAM_S stFrame;     // VENC frame
-    MPP_CHN_S vi_chn;          //  VI channel
-    MPP_CHN_S venc_chn;        //  VENC channel
     
     bool quit_flag;
     std::thread *video_thread;

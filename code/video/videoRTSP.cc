@@ -57,45 +57,18 @@ void VideoRTSP::update(Publisher* publisher, string msg)
 
 void VideoRTSP::videoCapture() 
 {
-    if (stFrame.pstPack == nullptr) {
-        stFrame.pstPack = (VENC_PACK_S *)malloc(sizeof(VENC_PACK_S));
-        if (stFrame.pstPack == nullptr) {
-            LOG_ERROR("Failed to allocate memory for VENC_PACK_S\n");
-            return;
-        }
-    }
-
-    if (vi_chn_init(viChannelId, video_width, video_height) != 0) {
-        LOG_ERROR("Failed to initialize VI channel\n");
-        return;
-    }
+    
 }
 
 void VideoRTSP::videoEncode() 
 {
-    if (venc_init(pipeId, video_width, video_height, RK_VIDEO_ID_AVC, RK_FMT_YUV420SP) != 0) {
-        LOG_ERROR("Failed to initialize VENC\n");
-        return;
-    }
 
-    if (bind_vi_to_venc(pipeId, &vi_chn, &venc_chn) != 0) {
-        LOG_ERROR("Failed to bind VI to VENC\n");
-        return;
-    }
 }
 
 void VideoRTSP::videoRtspTransmit() 
 {
-    if (rtsp_send_frame_h264(vencChannelId, &stFrame) != 0) {
-        LOG_ERROR("Failed to send H264 frame via RTSP\n");
-        return;
-    }
 
-    if (venc_release_frame(vencChannelId, &stFrame) != 0) {
-        LOG_ERROR("Failed to release VENC frame\n");
-        return;
-    }
- }
+}
 
 void VideoRTSP::video_thread_func()
 {
@@ -105,20 +78,24 @@ void VideoRTSP::video_thread_func()
 
     vi_chn_init(viChannelId, video_width, video_height);
     venc_init(pipeId, video_width, video_height, RK_VIDEO_ID_AVC, RK_FMT_YUV420SP);
+
+    MPP_CHN_S vi_chn, venc_chn;
     bind_vi_to_venc(pipeId, &vi_chn, &venc_chn);
 
     rkipc_osd_init();
-
-    videoCapture();
-    videoEncode();
+    
     while (!quit_flag)
     {
-        // rtsp_send_frame_h264(vencChannelId, &stFrame);
-        // venc_release_frame(vencChannelId, &stFrame);
-        videoRtspTransmit();
+        // 获取编码后的帧，发送到 RTSP 服务器
+        rtsp_send_frame_h264(vencChannelId, &stFrame);
+
+        // 释放编码后的帧
+        venc_release_frame(vencChannelId, &stFrame);
     }
 
     rkipc_osd_deinit();
+
+    usleep(500 * 1000);
     unbind_vi_to_venc(pipeId, &vi_chn, &venc_chn);
     venc_deinit(vencChannelId);
     vi_chn_deinit(pipeId, viChannelId);

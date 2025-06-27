@@ -35,26 +35,16 @@ void VideoLCD::update(Publisher* publisher, string msg)
 
 void VideoLCD::videoCapture()
 {
-   if(vi_get_frame(pipeId, viChannelId, video_width, video_height, &stViFrame) != 0)
-    {
-        LOG_DEBUG("******************************vi_get_frame error\n");
-        return;
-    }
+
 }
 void VideoLCD::videoEncode()
 {
-    if(venc_encode_frame(vencChannelId, &venc_frame) != 0) {
-        LOG_DEBUG("******************************venc_encode_frame error\n");
-        return;
-    }
+
 }
     
 void VideoLCD::videoRtspTransmit()
 {
-    if(rtsp_send_frame_h264(vencChannelId, &stFrame) != 0) {
-        LOG_DEBUG("******************************rtsp_send_frame_h264 error\n");
-        return;
-    }
+
 }
 
 
@@ -62,6 +52,17 @@ void VideoLCD::videoRtspTransmit()
 void VideoLCD::video_thread_func()
 {
     LOG_DEBUG("******************************VideoLCD  video_thread_func start\n");
+
+#if FPS_SHOW
+    char fps_text[16];
+    float fps = 0;
+    memset(fps_text, 0, 16);
+    int x_scaled = (float)50.0 / 704 * video_width;
+    int y_scaled = (float)50.0 / 576 * video_height;
+    int font_scaled = (float)1.0 / 576 * video_height;
+    int thickness_scaled = (float)1.0 / 576 * video_height;
+#endif
+
 
     stFrame.pstPack = (VENC_PACK_S *)malloc(sizeof(VENC_PACK_S));
 
@@ -99,11 +100,24 @@ void VideoLCD::video_thread_func()
         cv::resize(frame, dst, cv::Size(160, 128));
         video_frame_signal.emit(dst);
 
-        videoEncode();
-        videoRtspTransmit();
-        
-        venc_release_frame(vencChannelId, &stFrame);    
-        vi_release_frame(pipeId, viChannelId, &stViFrame);       
+#if FPS_SHOW
+        sprintf(fps_text, "fps = %.2f", fps);
+        cv::putText(dst, fps_text,
+                    cv::Point(x_scaled, y_scaled),
+                    cv::FONT_HERSHEY_SIMPLEX, 1,
+                    cv::Scalar(0, 255, 0), 1);
+#endif
+
+        venc_encode_frame(vencChannelId, &venc_frame);      // 编码
+        rtsp_send_frame_h264(vencChannelId, &stFrame);      // 发送
+
+#if FPS_SHOW
+        RK_U64 nowUs = TEST_COMM_GetNowUs();
+        fps = (float)1000000 / (float)(nowUs - venc_frame.stVFrame.u64PTS);
+#endif
+        venc_release_frame(vencChannelId, &stFrame);        // 释放
+        vi_release_frame(pipeId, viChannelId, &stViFrame);  // 释放   
+    
     }
 
     venc_deinit(vencChannelId);
