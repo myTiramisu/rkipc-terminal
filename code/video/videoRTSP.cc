@@ -69,11 +69,6 @@ void VideoRTSP::videoCapture()
         LOG_ERROR("Failed to initialize VI channel\n");
         return;
     }
-    
-    if (vi_get_frame(pipeId, viChannelId, video_width, video_height, &stViFrame) != 0) {
-        LOG_ERROR("Failed to get frame from VI channel\n");
-        return;
-    }
 }
 
 void VideoRTSP::videoEncode() 

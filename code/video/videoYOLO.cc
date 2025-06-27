@@ -86,17 +86,17 @@ void VideoYOLO::video_thread_func()
         detect_classes.insert(16);
     }
 
-    int ai_follow_enable = 1;
-    int ai_follow_people = 1;
-    int ai_follow_vehicle = 0;
-    int ai_follow_pet = 0;
-    int ai_follow_tolerance_width = 100;
-    int ai_follow_tolerance_height = 100;
-    int ai_follow_roi_x = 50;
-    int ai_follow_roi_y = 50;
-    int ai_follow_roi_width = 2204;
-    int ai_follow_roi_height = 1196;
-    int rgn_square_size = rgn_video_width * rgn_video_height;
+    int ai_follow_enable = 1;           // 是否启用AI跟随功能（1=启用，0=禁用）
+    int ai_follow_people = 1;           // 是否跟随“人”目标（1=跟随，0=不跟随）
+    int ai_follow_vehicle = 0;          // 是否跟随“车辆”目标（1=跟随，0=不跟随）
+    int ai_follow_pet = 0;              // 是否跟随“宠物”目标（1=跟随，0=不跟随）
+    int ai_follow_tolerance_width = 100;  // 跟随时，水平方向的容忍偏移像素（小于该值不调整云台）
+    int ai_follow_tolerance_height = 100; // 跟随时，垂直方向的容忍偏移像素（小于该值不调整云台）
+    int ai_follow_roi_x = 50;           // 跟随感兴趣区域ROI左上角x坐标
+    int ai_follow_roi_y = 50;           // 跟随感兴趣区域ROI左上角y坐标
+    int ai_follow_roi_width = 2204;     // 跟随感兴趣区域ROI宽度
+    int ai_follow_roi_height = 1196;    // 跟随感兴趣区域ROI高度
+    int rgn_square_size = rgn_video_width * rgn_video_height; // 整个视频区域的像素面积（用于目标面积归一化评分）
 
     // follow classes set
     std::unordered_set<int> follow_classes;
@@ -120,12 +120,14 @@ void VideoYOLO::video_thread_func()
 
     // follow target info
     bool is_follow_target_detected;
+    // 当前帧跟随目标的左上角坐标(sX, sY)和右下角坐标(eX, eY)，用于表示目标在画面中的位置
     int follow_sX, follow_sY, follow_eX, follow_eY;
+    // 上一帧跟随目标的左上角和右下角坐标，便于与当前目标做对比
     int follow_sX_last, follow_sY_last, follow_eX_last, follow_eY_last;
+    // 当前帧跟随目标的置信度（目标被识别的可信程度，通常为0~1之间的小数）
     float follow_target_prop;
 
-
-
+    
     // osd
     cv::Mat yuv420sp(video_height + video_height / 2, video_width, CV_8UC1);
     cv::Mat bgr(video_height, video_width, CV_8UC3);
@@ -229,8 +231,8 @@ void VideoYOLO::video_thread_func()
                         float score = det_result->prop + square_coefficient * (float)target_area / (float)rgn_square_size;
                         float last_score = follow_target_prop + square_coefficient * (float)last_target_area/ (float)rgn_square_size;
 
-                        LOG_DEBUG("target_prop: %.3f, target_area: %d, score: %.3f\n", det_result->prop, target_area, score);
-                        LOG_DEBUG("last_target_prop: %.3f, last_target_area: %d, last_score: %.3f\n", follow_target_prop, last_target_area, last_score);
+                        // LOG_DEBUG("target_prop: %.3f, target_area: %d, score: %.3f\n", det_result->prop, target_area, score);
+                        // LOG_DEBUG("last_target_prop: %.3f, last_target_area: %d, last_score: %.3f\n", follow_target_prop, last_target_area, last_score);
 
                         // 如果当前目标的得分更高，选择当前目标
                         if (score > last_score)
@@ -287,9 +289,9 @@ void VideoYOLO::video_thread_func()
                 continue;
             }
 
-            LOG_DEBUG("follow target: (%d, %d, %d, %d)\n", follow_sX, follow_sY, follow_eX, follow_eY);
-            LOG_DEBUG("cx: %d, cy: %d\n", cx, cy);
-            LOG_DEBUG("delta_x: %d, delta_y: %d\n", delta_x, delta_y);
+            // LOG_DEBUG("follow target: (%d, %d, %d, %d)\n", follow_sX, follow_sY, follow_eX, follow_eY);
+            // LOG_DEBUG("cx: %d, cy: %d\n", cx, cy);
+            // LOG_DEBUG("delta_x: %d, delta_y: %d\n", delta_x, delta_y);
 
             // 根据偏移量计算云台需要调整的角度，基于画幅 左右 90°，俯仰 45°，加上系数微调
             float pan_coefficient = 0.3;
@@ -297,7 +299,7 @@ void VideoYOLO::video_thread_func()
             int delta_pan = (int)(pan_coefficient * (float)delta_x / (float)rgn_video_width * 90);
             int delta_tilt = (int)(tilt_coefficient * (float)delta_y / (float)rgn_video_height * 45);
 
-            LOG_DEBUG("delta_pan: %d, delta_tilt: %d\n", delta_pan, delta_tilt);
+            // LOG_DEBUG("delta_pan: %d, delta_tilt: %d\n", delta_pan, delta_tilt);
 
             // 发射信号来调整云台位置
             signal_adjust_pantilt.emit(delta_pan, delta_tilt);  // 传递偏移量给舵机控制类
