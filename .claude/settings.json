@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "git-helper": {
+      "command": "python",
+      "args": ["D:/software/test/rkipc-terminal/mcp-git-server/server.py"]
+    }
+  }
+}
